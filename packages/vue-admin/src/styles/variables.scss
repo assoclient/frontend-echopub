@@ -1,0 +1,60 @@
+// Couleurs du thème mobile
+$primary-blue: #4D869C;
+$light-blue: #7AB2B2;
+$white: #EEF7FF;
+$soft-green: #CDE8E5;
+$dark-grey: #444444;
+$light-grey: #E0E0E0;
+$alert-red: #FF5B5B;
+$success: #43A047;
+
+// Variables CSS personnalisées
+:root {
+  --primary-blue: #{$primary-blue};
+  --light-blue: #{$light-blue};
+  --white: #{$white};
+  --soft-green: #{$soft-green};
+  --dark-grey: #{$dark-grey};
+  --light-grey: #{$light-grey};
+  --alert-red: #{$alert-red};
+  --success: #{$success};
+}
+
+// Mixins
+@mixin card-shadow {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+@mixin button-primary {
+  background-color: $primary-blue;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 1.2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: darken($primary-blue, 10%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(77, 134, 156, 0.3);
+  }
+}
+
+@mixin input-style {
+  background-color: $white;
+  border: 2px solid $light-grey;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary-blue;
+  }
+} 
