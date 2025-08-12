@@ -93,8 +93,37 @@
             {{ formatMoney(scope.row.budget) }}
           </template>
         </el-table-column>
+        <el-table-column label="Média" width="80">
+          <template #default="scope">
+            <div v-if="scope.row.media_url" class="media-thumbnail" @click="viewMedia(scope.row)">
+              <img 
+                :src="scope.row.media_url" 
+                :alt="scope.row.title"
+                class="thumbnail-image"
+              />
+              <div class="media-overlay">
+                <el-icon><View /></el-icon>
+              </div>
+            </div>
+            <span v-else class="no-media">Aucun média</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Transaction" width="120">
+          <template #default="scope">
+            <div v-if="scope.row.transaction" class="transaction-status">
+              <el-tag :type="getTransactionStatusType(scope.row.transaction.status)">
+                {{ getTransactionStatusLabel(scope.row.transaction.status) }}
+              </el-tag>
+              <div class="transaction-amount">
+                {{ formatMoney(scope.row.transaction.amount) }}
+              </div>
+            </div>
+            <span v-else class="no-transaction">Aucune transaction</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="views" label="Vues" />
         <el-table-column prop="clicks" label="Clics" />
+        <el-table-column prop="ambassadorCount" label="Ambassadeurs" />
         <el-table-column prop="createdAt" label="Date de création">
           <template #default="scope">
             {{ formatDate(scope.row.createdAt) }}
@@ -109,8 +138,14 @@
               size="small" 
               type="warning" 
               @click="toggleCampaign(scope.row)"
+              :loading="scope.row.updating"
+              :disabled="scope.row.status === 'submitted' && !canActivateCampaign(scope.row)"
             >
-              {{ scope.row.status === 'active' ? 'Pauser' : 'Activer' }}
+              {{ 
+                scope.row.status === 'active' ? 'Pauser' : 
+                scope.row.status === 'paused' ? 'Activer' :
+                scope.row.status === 'submitted' ? 'Activer' : 'Modifier'
+              }}
             </el-button>
           </template>
         </el-table-column>
@@ -129,13 +164,179 @@
         />
       </div>
     </div>
+
+    <!-- Modal de détails de la campagne -->
+    <el-dialog
+      v-model="campaignDetailsVisible"
+      title="Détails de la campagne"
+      width="800px"
+      :close-on-click-modal="false"
+    >
+      <div v-if="selectedCampaign" class="campaign-details">
+        <div class="detail-section">
+          <h4>Informations générales</h4>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <div class="detail-item">
+                <span class="label">Titre:</span>
+                <span class="value">{{ selectedCampaign.title }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Annonceur:</span>
+                <span class="value">{{ selectedCampaign.advertiser }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Statut:</span>
+                <el-tag :type="getStatusType(selectedCampaign.status)">
+                  {{ getStatusLabel(selectedCampaign.status) }}
+                </el-tag>
+              </div>
+            </el-col>
+            <el-col :span="12">
+              <div class="detail-item">
+                <span class="label">Budget:</span>
+                <span class="value">{{ formatMoney(selectedCampaign.budget) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Vues attendues:</span>
+                <span class="value">{{ selectedCampaign.expected_views || 'Non défini' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Date de création:</span>
+                <span class="value">{{ formatDate(selectedCampaign.createdAt) }}</span>
+              </div>
+            </el-col>
+          </el-row>
+        </div>
+
+        <div class="detail-section">
+          <h4>Statistiques</h4>
+          <el-row :gutter="20">
+            <el-col :span="8">
+              <div class="stat-card">
+                <div class="stat-value">{{ selectedCampaign.views || 0 }}</div>
+                <div class="stat-label">Vues totales</div>
+              </div>
+            </el-col>
+            <el-col :span="8">
+              <div class="stat-card">
+                <div class="stat-value">{{ selectedCampaign.clicks || 0 }}</div>
+                <div class="stat-label">Clics totaux</div>
+              </div>
+            </el-col>
+            <el-col :span="8">
+              <div class="stat-card">
+                <div class="stat-value">{{ selectedCampaign.ambassadorCount || 0 }}</div>
+                <div class="stat-label">Ambassadeurs</div>
+              </div>
+            </el-col>
+          </el-row>
+        </div>
+
+        <div class="detail-section" v-if="selectedCampaign.description">
+          <h4>Description</h4>
+          <p>{{ selectedCampaign.description }}</p>
+        </div>
+
+        <div class="detail-section" v-if="selectedCampaign.target_link">
+          <h4>Lien cible</h4>
+          <a :href="selectedCampaign.target_link" target="_blank" class="target-link">
+            {{ selectedCampaign.target_link }}
+          </a>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="campaignDetailsVisible = false">Fermer</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- Modal de confirmation pour le changement de statut -->
+    <el-dialog
+      v-model="statusChangeVisible"
+      title="Confirmation de changement de statut"
+      width="400px"
+      :close-on-click-modal="false"
+    >
+      <div class="status-change-confirmation">
+        <p>
+          Êtes-vous sûr de vouloir 
+          <strong>{{ statusChangeAction === 'pause' ? 'pauser' : 'activer' }}</strong> 
+          la campagne <strong>"{{ selectedCampaign?.title }}"</strong> ?
+        </p>
+        <p v-if="statusChangeAction === 'pause'" class="warning-text">
+          ⚠️ La campagne sera mise en pause et ne générera plus de vues.
+        </p>
+        <p v-else class="info-text">
+          ✅ La campagne sera activée et pourra générer des vues.
+        </p>
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="statusChangeVisible = false">Annuler</el-button>
+          <el-button 
+            type="warning" 
+            @click="confirmStatusChange"
+            :loading="updatingStatus"
+          >
+            Confirmer
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- Modal pour voir le média -->
+    <el-dialog
+      v-model="mediaViewVisible"
+      title="Média de la campagne"
+      width="600px"
+      :close-on-click-modal="false"
+    >
+      <div v-if="selectedCampaign" class="media-view">
+        <div class="media-info">
+          <h4>{{ selectedCampaign.title }}</h4>
+          <p><strong>Type:</strong> {{ getMediaType(selectedCampaign.media_url) }}</p>
+        </div>
+        
+        <div class="media-content">
+          <img 
+            v-if="isImage(selectedCampaign.media_url)" 
+            :src="selectedCampaign.media_url" 
+            :alt="selectedCampaign.title"
+            class="media-image"
+          />
+          <video 
+            v-else-if="isVideo(selectedCampaign.media_url)" 
+            :src="selectedCampaign.media_url" 
+            controls
+            class="media-video"
+          />
+          <div v-else class="media-unknown">
+            <el-icon><Document /></el-icon>
+            <p>Type de média non supporté</p>
+            <a :href="selectedCampaign.media_url" target="_blank" class="media-link">
+              Voir le fichier
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="mediaViewVisible = false">Fermer</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Search, Refresh } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { Search, Refresh, View, Document } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { campaignService } from '@/services/api'
 
 const campaigns = ref([])
@@ -152,62 +353,19 @@ const sortBy = ref('createdAt')
 const currentPage = ref(1)
 const pageSize = ref(10)
 
-// Campagnes filtrées
-const filteredCampaigns = computed(() => {
-  let filtered = campaigns.value
+// Modals
+const campaignDetailsVisible = ref(false)
+const statusChangeVisible = ref(false)
+const mediaViewVisible = ref(false)
+const selectedCampaign = ref(null)
+const statusChangeAction = ref('')
+const updatingStatus = ref(false)
 
-  // Filtre par recherche (titre)
-  if (searchQuery.value) {
-    filtered = filtered.filter(campaign =>
-      campaign.title.toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
-  }
+// Liste unique des annonceurs (sera mise à jour depuis le backend)
+const uniqueAdvertisers = ref([])
 
-  // Filtre par annonceur
-  if (advertiserFilter.value) {
-    filtered = filtered.filter(campaign => campaign.advertiser === advertiserFilter.value)
-  }
-
-  // Filtre par statut
-  if (statusFilter.value) {
-    filtered = filtered.filter(campaign => campaign.status === statusFilter.value)
-  }
-
-  // Tri
-  filtered.sort((a, b) => {
-    switch (sortBy.value) {
-      case 'budget':
-        return b.budget - a.budget
-      case 'views':
-        return b.views - a.views
-      case 'clicks':
-        return b.clicks - a.clicks
-      case 'advertiser':
-        return a.advertiser.localeCompare(b.advertiser)
-      case 'createdAt':
-      default:
-        return new Date(b.createdAt) - new Date(a.createdAt)
-    }
-  })
-
-  return filtered
-})
-
-// Liste unique des annonceurs
-const uniqueAdvertisers = computed(() => {
-  const advertisers = new Set()
-  campaigns.value.forEach(campaign => {
-    advertisers.add(campaign.advertiser)
-  })
-  return Array.from(advertisers).sort()
-})
-
-// Campagnes paginées
-const paginatedCampaigns = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return filteredCampaigns.value.slice(start, end)
-})
+// Campagnes paginées (directement depuis le backend)
+const paginatedCampaigns = computed(() => campaigns.value)
 
 // Handlers
 const handleSearch = () => {
@@ -260,9 +418,55 @@ const getStatusLabel = (status) => {
     active: 'Active',
     draft: 'Brouillon',
     completed: 'Terminée',
-    paused: 'Pausée'
+    paused: 'Pausée',
+    submitted: 'Soumise'
   }
   return labels[status] || status
+}
+
+const getTransactionStatusLabel = (status) => {
+  const labels = {
+    pending: 'En attente',
+    confirmed: 'Confirmée',
+    failed: 'Échouée',
+    cancelled: 'Annulée'
+  }
+  return labels[status] || status
+}
+
+const getTransactionStatusType = (status) => {
+  const types = {
+    pending: 'warning',
+    confirmed: 'success',
+    failed: 'danger',
+    cancelled: 'info'
+  }
+  return types[status] || 'info'
+}
+
+const canActivateCampaign = (campaign) => {
+  return campaign.status === 'submitted' && 
+         campaign.transaction && 
+         campaign.transaction.status === 'confirmed'
+}
+
+const isImage = (url) => {
+  if (!url) return false
+  const ext = url.split('.').pop().toLowerCase()
+  return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)
+}
+
+const isVideo = (url) => {
+  if (!url) return false
+  const ext = url.split('.').pop().toLowerCase()
+  return ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'].includes(ext)
+}
+
+const getMediaType = (url) => {
+  if (!url) return 'Aucun'
+  if (isImage(url)) return 'Image'
+  if (isVideo(url)) return 'Vidéo'
+  return 'Fichier'
 }
 
 const formatMoney = (amount) => {
@@ -273,12 +477,78 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString('fr-FR')
 }
 
+// Voir les détails d'une campagne
 const viewCampaign = (campaign) => {
-  ElMessage.info('Fonctionnalité en cours de développement')
+  selectedCampaign.value = campaign
+  campaignDetailsVisible.value = true
 }
 
+// Voir le média de la campagne
+const viewMedia = (campaign) => {
+  selectedCampaign.value = campaign
+  mediaViewVisible.value = true
+}
+
+// Changer le statut d'une campagne
 const toggleCampaign = (campaign) => {
-  ElMessage.success(`Campagne ${campaign.status === 'active' ? 'pausée' : 'activée'}`)
+  if (campaign.status === 'active') {
+    statusChangeAction.value = 'pause'
+  } else if (campaign.status === 'paused') {
+    statusChangeAction.value = 'activate'
+  } else if (campaign.status === 'submitted') {
+    if (canActivateCampaign(campaign)) {
+      statusChangeAction.value = 'activate'
+    } else {
+      ElMessage.warning('Une campagne ne peut être activée que si elle est soumise ET que sa transaction est confirmée')
+      return
+    }
+  } else {
+    ElMessage.warning('Seules les campagnes actives peuvent être pausées, les campagnes pausées peuvent être activées, et les campagnes soumises avec transaction confirmée peuvent être activées')
+    return
+  }
+  
+  selectedCampaign.value = campaign
+  statusChangeVisible.value = true
+}
+
+// Confirmer le changement de statut
+const confirmStatusChange = async () => {
+  if (!selectedCampaign.value) return
+  
+  const campaign = selectedCampaign.value
+  const newStatus = statusChangeAction.value === 'pause' ? 'paused' : 'active'
+  
+  try {
+    updatingStatus.value = true
+    
+    // Mettre à jour le statut localement d'abord
+    campaign.status = newStatus
+    campaign.updating = true
+    
+    // Appeler l'API pour mettre à jour le statut
+    await campaignService.changeCampaignStatus(campaign._id, newStatus)
+    
+    ElMessage.success(`Campagne ${statusChangeAction.value === 'pause' ? 'pausée' : 'activée'} avec succès`)
+    
+    // Fermer le modal
+    statusChangeVisible.value = false
+    selectedCampaign.value = null
+    
+    // Recharger les campagnes pour avoir les données à jour
+    await loadCampaigns()
+    
+  } catch (error) {
+    console.error('Erreur lors du changement de statut:', error)
+    ElMessage.error('Erreur lors du changement de statut')
+    
+    // Remettre l'ancien statut en cas d'erreur
+    campaign.status = statusChangeAction.value === 'pause' ? 'active' : 'paused'
+  } finally {
+    updatingStatus.value = false
+    if (campaign) {
+      campaign.updating = false
+    }
+  }
 }
 
 // Charger les campagnes depuis l'API
@@ -288,17 +558,43 @@ const loadCampaigns = async () => {
     const params = {
       page: currentPage.value,
       pageSize: pageSize.value,
-      search: searchQuery.value
+      search: searchQuery.value,
+      advertiser: advertiserFilter.value,
+      status: statusFilter.value,
+      sortBy: sortBy.value
     }
+    
+    console.log('🔍 loadCampaigns - Params envoyés au backend:', params)
+    
     const response = await campaignService.getAllCampaigns(params)
     campaigns.value = response.data
     totalCount.value = response.totalCount
+    
+    // Mettre à jour la liste des annonceurs uniques
+    updateUniqueAdvertisers()
+    
+    console.log('✅ loadCampaigns - Réponse reçue:', {
+      totalCount: response.totalCount,
+      campaignsCount: response.data.length
+    })
+    
   } catch (error) {
-    console.error('Erreur lors du chargement des campagnes:', error)
+    console.error('❌ Erreur lors du chargement des campagnes:', error)
     ElMessage.error('Erreur lors du chargement des campagnes')
   } finally {
     loading.value = false
   }
+}
+
+// Mettre à jour la liste des annonceurs uniques
+const updateUniqueAdvertisers = () => {
+  const advertisers = new Set()
+  campaigns.value.forEach(campaign => {
+    if (campaign.advertiser) {
+      advertisers.add(campaign.advertiser)
+    }
+  })
+  uniqueAdvertisers.value = Array.from(advertisers).sort()
 }
 
 // Charger les données au montage du composant
@@ -324,6 +620,226 @@ onMounted(() => {
     margin-top: 20px;
     display: flex;
     justify-content: center;
+  }
+}
+
+.campaign-details {
+  .detail-section {
+    margin-bottom: 24px;
+    
+    h4 {
+      margin: 0 0 16px 0;
+      color: var(--el-text-color-primary);
+      font-size: 16px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--el-border-color-light);
+      padding-bottom: 8px;
+    }
+    
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 8px 0;
+      
+      .label {
+        font-weight: 600;
+        color: var(--el-text-color-regular);
+        min-width: 120px;
+      }
+      
+      .value {
+        color: var(--el-text-color-primary);
+        text-align: right;
+      }
+    }
+    
+    .stat-card {
+      text-align: center;
+      padding: 16px;
+      background-color: var(--el-fill-color-light);
+      border-radius: 8px;
+      border: 1px solid var(--el-border-color-lighter);
+      
+      .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--el-color-primary);
+        margin-bottom: 8px;
+      }
+      
+      .stat-label {
+        color: var(--el-text-color-regular);
+        font-size: 14px;
+      }
+    }
+    
+    .target-link {
+      color: var(--el-color-primary);
+      text-decoration: none;
+      word-break: break-all;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.status-change-confirmation {
+  text-align: center;
+  
+  p {
+    margin: 12px 0;
+    line-height: 1.5;
+  }
+  
+  .warning-text {
+    color: var(--el-color-warning);
+    font-weight: 500;
+  }
+  
+  .info-text {
+    color: var(--el-color-success);
+    font-weight: 500;
+  }
+}
+
+.dialog-footer {
+  text-align: right;
+}
+
+// Styles pour les colonnes média et transaction
+.media-thumbnail {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid var(--el-border-color-lighter);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: var(--el-color-primary);
+    transform: scale(1.05);
+    
+    .media-overlay {
+      opacity: 1;
+    }
+  }
+  
+  .thumbnail-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .media-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    
+    .el-icon {
+      color: white;
+      font-size: 20px;
+    }
+  }
+}
+
+.no-media {
+  color: var(--el-text-color-placeholder);
+  font-style: italic;
+  font-size: 12px;
+}
+
+.transaction-status {
+  text-align: center;
+  
+  .transaction-amount {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--el-text-color-regular);
+    font-weight: 500;
+  }
+}
+
+.no-transaction {
+  color: var(--el-text-color-placeholder);
+  font-style: italic;
+  font-size: 12px;
+}
+
+// Styles pour le modal média
+.media-view {
+  .media-info {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--el-border-color-lighter);
+    
+    h4 {
+      margin: 0 0 8px 0;
+      color: var(--el-text-color-primary);
+    }
+    
+    p {
+      margin: 0;
+      color: var(--el-text-color-regular);
+    }
+  }
+  
+  .media-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    
+    .media-image {
+      max-width: 100%;
+      max-height: 400px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .media-video {
+      max-width: 100%;
+      max-height: 400px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .media-unknown {
+      text-align: center;
+      color: var(--el-text-color-placeholder);
+      
+      .el-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+      }
+      
+      p {
+        margin: 8px 0 16px 0;
+        font-size: 16px;
+      }
+      
+      .media-link {
+        color: var(--el-color-primary);
+        text-decoration: none;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
   }
 }
 </style> 

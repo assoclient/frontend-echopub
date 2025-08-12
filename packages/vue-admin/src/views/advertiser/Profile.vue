@@ -9,7 +9,7 @@
       <!-- Informations personnelles -->
       <div class="card">
         <h3>Informations personnelles</h3>
-        <el-form :model="profile" label-width="120px">
+        <el-form :model="profile" label-width="120px" v-loading="profileLoading">
           <el-form-item label="Nom complet">
             <el-input v-model="profile.name" />
           </el-form-item>
@@ -23,46 +23,25 @@
           </el-form-item>
           
           <el-form-item label="WhatsApp">
-            <el-input v-model="profile.whatsapp" />
+            <el-input v-model="profile.whatsapp_number" />
           </el-form-item>
           
           <el-form-item>
-            <el-button type="primary" @click="updateProfile">
+            <el-button type="primary" @click="updateProfile" :loading="updating">
               Mettre à jour
             </el-button>
           </el-form-item>
         </el-form>
-      </div>
-
-      <!-- Statistiques des campagnes -->
-      <div class="card">
-        <h3>Statistiques des campagnes</h3>
-        <div class="stats-info">
-          <div class="stat-item">
-            <span class="label">Campagnes créées</span>
-            <span class="amount">{{ profile.campaignsCount }}</span>
-          </div>
-          
-          <div class="stat-item">
-            <span class="label">Total dépensé</span>
-            <span class="amount">{{ formatMoney(profile.totalSpent) }}</span>
-          </div>
-          
-          <div class="stat-item">
-            <span class="label">Campagnes actives</span>
-            <span class="amount">{{ profile.activeCampaigns }}</span>
-          </div>
-        </div>
       </div>
     </div>
 
     <!-- Historique des transactions -->
     <div class="card">
       <h3>Historique des transactions</h3>
-      <el-table :data="transactions" style="width: 100%">
-        <el-table-column prop="date" label="Date">
+      <el-table :data="transactions" style="width: 100%" v-loading="transactionsLoading">
+        <el-table-column prop="createdAt" label="Date">
           <template #default="scope">
-            {{ formatDate(scope.row.date) }}
+            {{ formatDate(scope.row.createdAt) }}
           </template>
         </el-table-column>
         <el-table-column prop="type" label="Type">
@@ -90,36 +69,23 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { profileService } from '@/services/api'
+
+const profileLoading = ref(false)
+const transactionsLoading = ref(false)
+const updating = ref(false)
 
 const profile = reactive({
-  name: 'John Doe',
-  email: 'john@example.com',
-  phone: '+237 123456789',
-  whatsapp: '+237 123456789',
-  balance: 150000,
-  totalSpent: 850000,
-  campaignsCount: 12,
-  activeCampaigns: 5
+  _id: '',
+  name: '',
+  email: '',
+  phone: '',
+  whatsapp_number: ''
 })
 
-const transactions = ref([
-  {
-    id: 1,
-    date: new Date(),
-    type: 'deposit',
-    amount: 50000,
-    status: 'completed'
-  },
-  {
-    id: 2,
-    date: new Date(Date.now() - 86400000),
-    type: 'deposit',
-    amount: 100000,
-    status: 'completed'
-  }
-])
+const transactions = ref([])
 
 const formatMoney = (amount) => {
   return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA'
@@ -131,7 +97,7 @@ const formatDate = (date) => {
 
 const getStatusType = (status) => {
   const types = {
-    completed: 'success',
+    confirmed: 'success',
     pending: 'warning',
     failed: 'danger'
   }
@@ -140,16 +106,73 @@ const getStatusType = (status) => {
 
 const getStatusLabel = (status) => {
   const labels = {
-    completed: 'Terminé',
+    confirmed: 'Terminé',
     pending: 'En attente',
     failed: 'Échoué'
   }
   return labels[status] || status
 }
 
-const updateProfile = () => {
-  ElMessage.success('Profil mis à jour avec succès')
+const loadProfile = async () => {
+  try {
+    profileLoading.value = true
+    const userData = await profileService.getMyProfile()
+    
+    // Mettre à jour les informations du profil
+    Object.assign(profile, userData)
+    
+  } catch (error) {
+    console.error('Erreur lors du chargement du profil:', error)
+    ElMessage.error('Erreur lors du chargement du profil')
+  } finally {
+    profileLoading.value = false
+  }
 }
+
+const loadTransactions = async () => {
+  try {
+    transactionsLoading.value = true
+    const response = await profileService.getMyTransactions()
+    
+    if (response.data) {
+      transactions.value = response.data
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement des transactions:', error)
+    ElMessage.error('Erreur lors du chargement des transactions')
+  } finally {
+    transactionsLoading.value = false
+  }
+}
+
+const updateProfile = async () => {
+  try {
+    updating.value = true
+    
+    // Préparer les données à envoyer (exclure les champs calculés)
+    const updateData = {
+      _id: profile._id,
+      name: profile.name,
+      email: profile.email,
+      phone: profile.phone,
+      whatsapp_number: profile.whatsapp_number
+    }
+    
+    await profileService.updateProfile(updateData)
+    
+    ElMessage.success('Profil mis à jour avec succès')
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour du profil:', error)
+    ElMessage.error('Erreur lors de la mise à jour du profil')
+  } finally {
+    updating.value = false
+  }
+}
+
+onMounted(() => {
+  loadProfile()
+  loadTransactions()
+})
 </script>
 
 <style lang="scss" scoped>

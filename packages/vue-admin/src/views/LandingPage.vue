@@ -4,46 +4,87 @@
     <nav class="navbar">
       <div class="nav-container">
         <div class="nav-logo">
-          <img src="/assets/logo.png" width="150" alt="Logo" class="logo" />
+          <img src="/assets/logobg1.png" width="150" alt="Logo" class="logo" />
         </div>
         <div class="nav-buttons">
-          <el-button type="primary" @click="goToLogin">Se connecter</el-button>
-          <el-button @click="goToRegister">Créer un compte</el-button>
-          <el-button type="text" @click="goToAdminLogin" class="admin-link">Admin</el-button>
-        </div>
+          <el-button type="primary" class="login-button" @click="goToLogin">Se connecter</el-button>
+          <el-button class="register-button" size="large" @click="goToRegister">Créer un compte</el-button>
+<!--           <el-button type="text" @click="goToAdminLogin" class="admin-link">Admin</el-button>
+ -->        </div>
       </div>
     </nav>
 
     <!-- Hero Section -->
     <section class="hero">
-      <div class="hero-container">
-        <div class="hero-content">
-          <h1>Transformez votre audience en ambassadeurs</h1>
-          <p>Plateforme innovante de marketing d'influence qui connecte annonceurs et ambassadeurs pour des campagnes publicitaires performantes.</p>
-          <div class="hero-buttons">
-            <el-button type="primary" size="large" @click="goToRegister">
-              Commencer maintenant
-            </el-button>
-            <el-button size="large" @click="scrollToFeatures">
-              En savoir plus
-            </el-button>
-          </div>
-        </div>
-        <div class="hero-image">
-          <div class="app-mockup">
-            <div class="phone-mockup">
-              <div class="screen">
-                <div class="app-content">
-                  <div class="app-header"></div>
-                  <div class="app-body">
-                    <div class="campaign-card"></div>
-                    <div class="campaign-card"></div>
-                  </div>
-                </div>
+      <div class="hero-slider">
+        <!-- Slide 1: Annonceurs -->
+        <div class="hero-slide" :class="{ active: currentSlide === 0 }">
+          <div class="hero-container">
+            <div class="hero-content">
+              <h1>Boostez vos campagnes publicitaires</h1>
+              <p>Connectez-vous avec des ambassadeurs qualifiés et multipliez l'impact de vos campagnes marketing grâce à notre plateforme innovante.</p>
+              <div class="hero-buttons">
+                <el-button type="primary" size="large" @click="goToRegister">
+                  Créer ma campagne
+                </el-button>
+                <el-button size="large" @click="scrollToFeatures">
+                  Découvrir nos services
+                </el-button>
               </div>
+            </div>
+            <div class="hero-image">
+              <img src="/assets/phone_landing-removebg-preview.png" 
+              alt="Hero Image" class="hero-image-img">
+            
             </div>
           </div>
         </div>
+
+        <!-- Slide 2: Ambassadeurs -->
+        <div class="hero-slide" :class="{ active: currentSlide === 1 }">
+          <div class="hero-container">
+            <div class="hero-content">
+              <h1>Gagnez en partageant du contenu</h1>
+              <p>Rejoignez notre communauté d'ambassadeurs et monétisez votre influence en promouvant des marques qui vous correspondent.</p>
+              <div class="hero-buttons">
+                <el-button type="primary" size="large" @click="goToRegister">
+                  Devenir ambassadeur
+                </el-button>
+                <el-button size="large" @click="scrollToFeatures">
+                  Voir les opportunités
+                </el-button>
+              </div>
+            </div>
+            <div class="hero-image">
+              <img src="/assets/phone_landing1-removebg-preview.png" 
+              alt="Hero Image" class="hero-image-img">
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation dots -->
+        <!-- <div class="slider-dots">
+          <div 
+            class="dot" 
+            :class="{ active: currentSlide === 0 }"
+            @click="goToSlide(0)"
+          ></div>
+          <div 
+            class="dot" 
+            :class="{ active: currentSlide === 1 }"
+            @click="goToSlide(1)"
+          ></div>
+        </div> -->
+
+        <!-- Navigation arrows -->
+      <!--   <div class="slider-arrows">
+          <div class="arrow arrow-left" @click="previousSlide">
+            <el-icon><ArrowLeft /></el-icon>
+          </div>
+          <div class="arrow arrow-right" @click="nextSlide">
+            <el-icon><ArrowRight /></el-icon>
+          </div>
+        </div> -->
       </div>
     </section>
 
@@ -90,7 +131,7 @@
         <h2>Téléchargez l'application mobile</h2>
         <p>Accédez à EchoPub depuis votre smartphone et gérez vos campagnes en déplacement.</p>
         <div class="download-buttons">
-          <div class="download-card">
+          <!-- <div class="download-card">
             <div class="download-icon">
               <el-icon><Apple /></el-icon>
             </div>
@@ -101,10 +142,10 @@
             <el-button type="primary" @click="downloadIOS">
               Télécharger
             </el-button>
-          </div>
+          </div> -->
           <div class="download-card">
             <div class="download-icon">
-              <el-icon><Android /></el-icon>
+              <img src="/assets/icons/android.png" width="50" height="50" alt="Google Play" class="download-icon-img">
             </div>
             <div class="download-content">
               <h4>Télécharger sur Android</h4>
@@ -124,10 +165,10 @@
         <h2>Prêt à commencer ?</h2>
         <p>Rejoignez des milliers d'annonceurs et d'ambassadeurs qui font confiance à EchoPub.</p>
         <div class="cta-buttons">
-          <el-button type="primary" size="large" @click="goToRegister">
+          <el-button type="primary" class="cta-button" size="large" @click="goToRegister">
             Créer un compte gratuit
           </el-button>
-          <el-button size="large" @click="goToLogin">
+          <el-button class="cta-button cta-button-primary" size="large" @click="goToLogin">
             Se connecter
           </el-button>
         </div>
@@ -175,7 +216,7 @@
 </template>
 
 <script>
-import { TrendCharts, User, Money, Location, Apple, Android } from '@element-plus/icons-vue'
+import { TrendCharts, User, Money, Location, Apple, Android, ArrowRight, ArrowLeft } from '@element-plus/icons-vue'
 
 export default {
   name: 'LandingPage',
@@ -185,9 +226,48 @@ export default {
     Money,
     Location,
     Apple,
-    Android
+    Android,
+    ArrowRight,
+    ArrowLeft
+  },
+  data() {
+    return {
+      currentSlide: 0,
+      autoPlayInterval: null
+    }
+  },
+  mounted() {
+    this.startAutoPlay()
+  },
+  beforeUnmount() {
+    this.stopAutoPlay()
   },
   methods: {
+    // Slider navigation
+    goToSlide(slideIndex) {
+      this.currentSlide = slideIndex
+    },
+    nextSlide() {
+      this.currentSlide = (this.currentSlide + 1) % 2
+    },
+    previousSlide() {
+      this.currentSlide = this.currentSlide === 0 ? 1 : 0
+    },
+    
+    // Auto-play functionality
+    startAutoPlay() {
+      this.autoPlayInterval = setInterval(() => {
+        this.nextSlide()
+      }, 5000) // Change slide every 5 seconds
+    },
+    stopAutoPlay() {
+      if (this.autoPlayInterval) {
+        clearInterval(this.autoPlayInterval)
+        this.autoPlayInterval = null
+      }
+    },
+    
+    // Navigation methods
     goToLogin() {
       this.$router.push('/login/advertiser')
     },
@@ -217,7 +297,22 @@ export default {
   min-height: 100vh;
   background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
 }
-
+.login-button {
+  background-color: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  height: 40px;
+  border-radius: 15px;
+}
+.register-button {
+  background-color: white;
+  color: black;
+  border: none;
+  padding: 10px 20px;
+  height: 40px;
+  border-radius: 15px;
+}
 // Navigation
 .navbar {
   position: fixed;
@@ -263,8 +358,34 @@ export default {
 
 // Hero Section
 .hero {
-  padding: 120px 0 80px;
+  padding: 60px 0 120px;
   color: white;
+  position: relative;
+  overflow: hidden;
+  min-height: 800px;
+
+  .hero-slider {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+    pointer-events: none;
+    padding: 120px 0 80px;
+
+    &.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+  }
 
   .hero-container {
     max-width: 1200px;
@@ -274,6 +395,9 @@ export default {
     grid-template-columns: 1fr 1fr;
     gap: 4rem;
     align-items: center;
+    min-height: 0px;
+    position: relative;
+    z-index: 1;
 
     .hero-content {
       h1 {
@@ -281,6 +405,7 @@ export default {
         font-weight: 700;
         margin-bottom: 1.5rem;
         line-height: 1.2;
+        animation: slideInLeft 0.8s ease-out;
       }
 
       p {
@@ -288,12 +413,14 @@ export default {
         margin-bottom: 2rem;
         opacity: 0.9;
         line-height: 1.6;
+        animation: slideInLeft 0.8s ease-out 0.2s both;
       }
 
       .hero-buttons {
         display: flex;
         gap: 1rem;
         flex-wrap: wrap;
+        animation: slideInLeft 0.8s ease-out 0.4s both;
       }
     }
 
@@ -301,17 +428,63 @@ export default {
       display: flex;
       justify-content: center;
       align-items: center;
-
+      animation: slideInRight 0.8s ease-out 0.3s both;
+        .hero-image-img {
+          width: 50%;
+          height: 50%;
+          object-fit: cover;
+        }
       .app-mockup {
         position: relative;
         
+        &.advertiser-mockup {
+          .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px 8px 0 0;
+            text-align: center;
+            
+            .header-icon {
+              font-size: 24px;
+              margin-bottom: 5px;
+            }
+            
+            .header-title {
+              font-weight: 600;
+              font-size: 14px;
+            }
+          }
+        }
+        
+        &.ambassador-mockup {
+          .app-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px 8px 0 0;
+            text-align: center;
+            
+            .header-icon {
+              font-size: 24px;
+              margin-bottom: 5px;
+            }
+            
+            .header-title {
+              font-weight: 600;
+              font-size: 14px;
+            }
+          }
+        }
+        
         .phone-mockup {
-          width: 280px;
-          height: 560px;
+          width: 260px;
+          height: 520px;
           background: #000;
           border-radius: 30px;
           padding: 8px;
           box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+          margin: 0 auto;
 
           .screen {
             width: 100%;
@@ -327,6 +500,11 @@ export default {
               .app-header {
                 height: 60px;
                 background: var(--primary-blue);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: 600;
               }
 
               .app-body {
@@ -338,11 +516,116 @@ export default {
                   border-radius: 8px;
                   margin-bottom: 1rem;
                   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                  padding: 12px;
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: space-between;
+
+                  .card-header {
+                    font-weight: 600;
+                    color: var(--primary-blue);
+                    font-size: 14px;
+                    margin-bottom: 8px;
+                  }
+
+                  .card-stats {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 12px;
+                    color: var(--dark-grey);
+
+                    span {
+                      display: flex;
+                      align-items: center;
+                      gap: 4px;
+                    }
+                  }
                 }
               }
             }
           }
         }
+      }
+    }
+  }
+
+  // Slider Navigation
+  .slider-dots {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 10;
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.7);
+        transform: scale(1.1);
+      }
+
+      &.active {
+        background: white;
+        border-color: var(--primary-blue);
+        transform: scale(1.2);
+      }
+    }
+  }
+
+  .slider-arrows {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2rem;
+    z-index: 10;
+    pointer-events: none;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    .arrow {
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      pointer-events: all;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+        border-color: white;
+      }
+
+      .el-icon {
+        color: white;
+        font-size: 20px;
+      }
+
+      &.arrow-left {
+        left: 2rem;
+      }
+
+      &.arrow-right {
+        right: 2rem;
       }
     }
   }
@@ -361,7 +644,7 @@ export default {
     h2 {
       text-align: center;
       font-size: 2.5rem;
-      color: var(--primary-blue);
+      color: transparentize($color: #000000, $amount: 0.4);
       margin-bottom: 3rem;
     }
 
@@ -452,7 +735,7 @@ export default {
         .download-icon {
           width: 60px;
           height: 60px;
-          background: var(--primary-blue);
+         // background: var(--primary-blue);
           border-radius: 12px;
           display: flex;
           align-items: center;
@@ -509,6 +792,19 @@ export default {
       justify-content: center;
       gap: 1rem;
       flex-wrap: wrap;
+    }
+    .cta-button {
+      
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      height: 40px;
+      border-radius: 15px;
+    }
+    .cta-button-primary {
+      
+      color: black !important;
+      
     }
   }
 }
@@ -602,6 +898,86 @@ export default {
 
   .navbar .nav-container {
     padding: 1rem;
+  }
+}
+
+// Animations for slider
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Enhanced app content styles
+.app-content {
+  .app-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+  }
+
+  .app-body {
+    padding: 1rem;
+
+    .campaign-card {
+      height: 80px;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+
+      .card-header {
+        font-weight: 600;
+        color: var(--primary-blue);
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+
+      .card-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--dark-grey);
+
+        span {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+      }
+    }
   }
 }
 </style> 

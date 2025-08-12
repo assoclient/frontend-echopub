@@ -3,7 +3,7 @@
     <!-- Sidebar -->
     <aside class="sidebar" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
       <div class="sidebar-header">
-        <img src="/assets/logo.png" width="150" alt="Logo" class="logo" />
+        <img src="/assets/EchoPub-removebg-preview.png"  alt="Logo" class="logo" />
         
       </div>
       
@@ -102,7 +102,7 @@ const handleUserMenu = (command) => {
   switch (command) {
     case 'logout':
       authStore.logout()
-      router.push('/login')
+      router.push('/login/advertiser')
       break
     case 'profile':
       router.push('/advertiser/profile')
@@ -128,6 +128,7 @@ const handleUserMenu = (command) => {
     
     .sidebar-header h3 {
       display: none;
+      
     }
     
     .nav-item span {

@@ -82,6 +82,7 @@
 
 <script>
 import { User, Lock, Check } from '@element-plus/icons-vue'
+import { useAuthStore } from '@/stores/auth'
 
 export default {
   name: 'AdvertiserLogin',
@@ -115,27 +116,66 @@ export default {
         if (!valid) return
 
         this.loading = true
+        console.log('🔐 Tentative de connexion annonceur...')
 
-        // Simuler la connexion
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        // Utiliser le store Pinia pour la connexion
+        const authStore = useAuthStore()
+        const result = await authStore.login({
+          email: this.form.identifier, // Le backend accepte email ou whatsapp_number
+          password: this.form.password
+        })
 
-        // Simuler des données utilisateur annonceur
-        const userData = {
-          id: 1,
-          name: 'Advertiser User',
-          email: this.form.identifier,
-          role: 'advertiser',
-          balance: 1500
+        console.log('📋 Résultat de la connexion:', result)
+
+        if (!result.success) {
+          console.error('❌ Échec de la connexion:', result.message)
+          this.$message.error(result.message || 'Erreur lors de la connexion')
+          return
         }
 
-        // Stocker les données utilisateur
-        localStorage.setItem('user', JSON.stringify(userData))
-        localStorage.setItem('token', 'fake-jwt-token')
+        console.log('✅ Connexion réussie, vérification du rôle...')
+        console.log('👤 Rôle utilisateur:', authStore.userRole)
+
+        // Vérifier que l'utilisateur est bien un annonceur
+        if (authStore.userRole !== 'advertiser') {
+          console.error('❌ Mauvais rôle:', authStore.userRole)
+          this.$message.error('Ce compte n\'est pas un compte annonceur')
+          authStore.logout() // Déconnecter l'utilisateur
+          return
+        }
+
+        // Stocker le type d'utilisateur pour différencier des admins
+        localStorage.setItem('userType', 'user')
+        // Stocker l'ID utilisateur séparément pour un accès facile
+        localStorage.setItem('userId', authStore.user.id)
+        console.log('💾 Type utilisateur stocké:', 'user')
+        console.log('💾 User ID stocké:', authStore.user.id)
 
         this.$message.success('Connexion réussie !')
-        this.$router.push('/advertiser/dashboard')
+        
+        console.log('🔄 Redirection vers /advertiser/dashboard...')
+        // Utiliser await pour s'assurer que la navigation se termine
+        await this.$router.push('/advertiser/dashboard')
+        console.log('✅ Redirection terminée')
+        
       } catch (error) {
-        this.$message.error('Erreur lors de la connexion')
+        console.error('❌ Erreur lors de la connexion:', error)
+        console.error('📋 Détails de l\'erreur:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        })
+        
+        // Gérer les erreurs spécifiques
+        if (error.response?.data?.message) {
+          this.$message.error(error.response.data.message)
+        } else if (error.response?.status === 400) {
+          this.$message.error('Email/téléphone ou mot de passe incorrect')
+        } else if (error.response?.status === 404) {
+          this.$message.error('Utilisateur introuvable')
+        } else {
+          this.$message.error('Erreur lors de la connexion. Veuillez réessayer.')
+        }
       } finally {
         this.loading = false
       }

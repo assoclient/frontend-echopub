@@ -92,6 +92,7 @@ const menuItems = [
   { path: '/admin/users', label: 'Utilisateurs', icon: 'User' },
   { path: '/admin/admins', label: 'Administrateurs', icon: 'UserFilled' },
   { path: '/admin/campaigns', label: 'Campagnes', icon: 'Promotion' },
+  { path: '/admin/publications', label: 'Publications', icon: 'Document' },
   { path: '/admin/transactions', label: 'Transactions', icon: 'Money' },
   { path: '/admin/reports', label: 'Rapports', icon: 'TrendCharts' },
   { path: '/admin/settings', label: 'Paramètres', icon: 'Setting' }

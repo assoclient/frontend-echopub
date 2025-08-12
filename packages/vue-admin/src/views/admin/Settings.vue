@@ -64,14 +64,35 @@
           ref="paymentFormRef"
           label-width="150px"
         >
-          <el-form-item label="Commission plateforme (%)" prop="platformCommission">
+          <el-form-item label="CPV annonceur (FCFA)" prop="cpv">
             <el-input-number 
-              v-model="paymentSettings.platformCommission" 
-              :min="0" 
-              :max="50" 
-              :precision="2"
+              v-model="paymentSettings.cpv" 
+              :min="10" 
+              :max="100" 
+              :step="1"
               style="width: 100%"
             />
+            <div class="form-tip">Coût par vue pour l'annonceur</div>
+          </el-form-item>
+          
+          <el-form-item label="CPV ambassadeur (FCFA)" prop="cpv_ambassador">
+            <el-input-number 
+              v-model="paymentSettings.cpv_ambassador" 
+              :min="5" 
+              :max="50" 
+              :step="1"
+              style="width: 100%"
+            />
+            <div class="form-tip">Coût par vue pour l'ambassadeur</div>
+          </el-form-item>
+          
+          <el-form-item label="Commission plateforme">
+            <el-input 
+              :value="`${paymentSettings.cpv - paymentSettings.cpv_ambassador} FCFA`" 
+              disabled 
+              style="width: 100%"
+            />
+            <div class="form-tip">Calculée automatiquement (CPV annonceur - CPV ambassadeur)</div>
           </el-form-item>
           
           <el-form-item label="Montant minimum campagne" prop="minCampaignAmount">
@@ -273,7 +294,8 @@ const generalSettings = reactive({
 
 // Paramètres de paiement
 const paymentSettings = reactive({
-  platformCommission: 10.0,
+  cpv: 14,
+  cpv_ambassador: 10,
   minCampaignAmount: 10000,
   maxCampaignAmount: 1000000,
   mtnMoneyEnabled: true,
@@ -324,9 +346,13 @@ const generalRules = {
 }
 
 const paymentRules = {
-  platformCommission: [
-    { required: true, message: 'La commission est requise', trigger: 'blur' },
-    { type: 'number', min: 0, max: 50, message: 'La commission doit être entre 0 et 50%', trigger: 'blur' }
+  cpv: [
+    { required: true, message: 'Le CPV annonceur est requis', trigger: 'blur' },
+    { type: 'number', min: 10, max: 100, message: 'Le CPV annonceur doit être entre 10 et 100 FCFA', trigger: 'blur' }
+  ],
+  cpv_ambassador: [
+    { required: true, message: 'Le CPV ambassadeur est requis', trigger: 'blur' },
+    { type: 'number', min: 5, max: 50, message: 'Le CPV ambassadeur doit être entre 5 et 50 FCFA', trigger: 'blur' }
   ],
   minCampaignAmount: [
     { required: true, message: 'Le montant minimum est requis', trigger: 'blur' },
@@ -537,6 +563,14 @@ onMounted(() => {
     background: white;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .form-tip {
+    font-size: 12px;
+    color: var(--dark-grey);
+    opacity: 0.7;
+    margin-top: 4px;
+    font-style: italic;
   }
 }
 

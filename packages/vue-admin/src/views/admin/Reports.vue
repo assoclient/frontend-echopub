@@ -31,7 +31,7 @@
         </el-col>
         
         <el-col :span="4">
-          <el-button type="primary" @click="exportReport">
+          <el-button type="primary" @click="exportReport" :loading="exporting">
             <el-icon><Download /></el-icon>
             Exporter
           </el-button>
@@ -40,7 +40,7 @@
     </div>
 
     <!-- Statistiques générales -->
-    <div class="stats-grid">
+    <div class="stats-grid" v-loading="loading">
       <div class="stat-card">
         <div class="stat-icon">
           <el-icon><User /></el-icon>
@@ -142,7 +142,7 @@
       <!-- Top annonceurs -->
       <div class="card">
         <h3>Top 10 des annonceurs</h3>
-        <el-table :data="topAdvertisers" style="width: 100%">
+        <el-table :data="topAdvertisers" style="width: 100%" v-loading="loading">
           <el-table-column prop="rank" label="Rang" width="60" />
           <el-table-column prop="name" label="Annonceur" />
           <el-table-column prop="campaigns" label="Campagnes" />
@@ -158,7 +158,7 @@
       <!-- Top ambassadeurs -->
       <div class="card">
         <h3>Top 10 des ambassadeurs</h3>
-        <el-table :data="topAmbassadors" style="width: 100%">
+        <el-table :data="topAmbassadors" style="width: 100%" v-loading="loading">
           <el-table-column prop="rank" label="Rang" width="60" />
           <el-table-column prop="name" label="Ambassadeur" />
           <el-table-column prop="publications" label="Publications" />
@@ -268,7 +268,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { 
   User, 
   Promotion, 
@@ -280,56 +280,37 @@ import {
   DataAnalysis 
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { dashboardService } from '@/services/api'
 
+const loading = ref(false)
+const exporting = ref(false)
 const periodFilter = ref('30')
 const dateRange = ref([])
 const activeTab = ref('users')
 
 // Statistiques
 const stats = reactive({
-  totalUsers: 15420,
-  newUsers: 1250,
-  totalCampaigns: 3420,
-  activeCampaigns: 890,
-  totalRevenue: 45000000,
-  monthlyRevenue: 3200000,
-  totalViews: 12500000,
-  monthlyViews: 850000,
-  activeUsers: 8900,
-  retentionRate: 78.5,
-  conversionRate: 3.2,
-  averageCTR: 2.1,
-  platformCommission: 4500000,
-  ambassadorPayments: 18000000
+  totalUsers: 0,
+  newUsers: 0,
+  totalCampaigns: 0,
+  activeCampaigns: 0,
+  totalRevenue: 0,
+  monthlyRevenue: 0,
+  totalViews: 0,
+  monthlyViews: 0,
+  activeUsers: 0,
+  retentionRate: 0,
+  conversionRate: 0,
+  averageCTR: 0,
+  platformCommission: 0,
+  ambassadorPayments: 0
 })
 
 // Top annonceurs
-const topAdvertisers = ref([
-  { rank: 1, name: 'Tech Solutions', campaigns: 45, spent: 8500000, views: 1250000 },
-  { rank: 2, name: 'Fashion Store', campaigns: 32, spent: 6200000, views: 980000 },
-  { rank: 3, name: 'E-commerce Plus', campaigns: 28, spent: 5400000, views: 820000 },
-  { rank: 4, name: 'Startup XYZ', campaigns: 25, spent: 4800000, views: 750000 },
-  { rank: 5, name: 'Innovation Corp', campaigns: 22, spent: 4200000, views: 680000 },
-  { rank: 6, name: 'Marketing Pro', campaigns: 18, spent: 3800000, views: 620000 },
-  { rank: 7, name: 'Digital Agency', campaigns: 15, spent: 3200000, views: 550000 },
-  { rank: 8, name: 'Brand Manager', campaigns: 12, spent: 2800000, views: 480000 },
-  { rank: 9, name: 'Ad Expert', campaigns: 10, spent: 2400000, views: 420000 },
-  { rank: 10, name: 'Campaign Master', campaigns: 8, spent: 2000000, views: 380000 }
-])
+const topAdvertisers = ref([])
 
 // Top ambassadeurs
-const topAmbassadors = ref([
-  { rank: 1, name: 'Marie Dupont', publications: 156, earnings: 850000, clicks: 12500 },
-  { rank: 2, name: 'Jean Martin', publications: 142, earnings: 720000, clicks: 11200 },
-  { rank: 3, name: 'Sophie Bernard', publications: 128, earnings: 680000, clicks: 9800 },
-  { rank: 4, name: 'Pierre Dubois', publications: 115, earnings: 620000, clicks: 8900 },
-  { rank: 5, name: 'Anne Moreau', publications: 98, earnings: 540000, clicks: 7800 },
-  { rank: 6, name: 'Luc Petit', publications: 87, earnings: 480000, clicks: 7200 },
-  { rank: 7, name: 'Claire Roux', publications: 76, earnings: 420000, clicks: 6500 },
-  { rank: 8, name: 'François Leroy', publications: 65, earnings: 380000, clicks: 5800 },
-  { rank: 9, name: 'Isabelle Blanc', publications: 54, earnings: 320000, clicks: 5200 },
-  { rank: 10, name: 'Michel Durand', publications: 45, earnings: 280000, clicks: 4800 }
-])
+const topAmbassadors = ref([])
 
 const formatNumber = (num) => {
   return new Intl.NumberFormat('fr-FR').format(num)
@@ -339,15 +320,63 @@ const formatMoney = (amount) => {
   return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA'
 }
 
-const updateReports = () => {
-  ElMessage.info('Mise à jour des rapports...')
-  // Ici on ferait un appel API pour récupérer les nouvelles données
+const loadReports = async () => {
+  try {
+    loading.value = true
+    
+    const params = {
+      period: periodFilter.value
+    }
+    
+    if (dateRange.value && dateRange.value.length === 2) {
+      params.startDate = dateRange.value[0]
+      params.endDate = dateRange.value[1]
+    }
+    
+    const response = await dashboardService.getDetailedReports(params)
+    
+    if (response.success) {
+      const data = response.data
+      
+      // Mettre à jour les statistiques
+      Object.assign(stats, data.stats)
+      
+      // Mettre à jour les top performers
+      topAdvertisers.value = data.topAdvertisers || []
+      topAmbassadors.value = data.topAmbassadors || []
+    }
+    
+  } catch (error) {
+    console.error('Erreur lors du chargement des rapports:', error)
+    ElMessage.error('Erreur lors du chargement des rapports')
+  } finally {
+    loading.value = false
+  }
 }
 
-const exportReport = () => {
-  ElMessage.success('Rapport exporté avec succès')
-  // Ici on exporterait le rapport en PDF/Excel
+const updateReports = () => {
+  loadReports()
 }
+
+const exportReport = async () => {
+  try {
+    exporting.value = true
+    
+    // Simuler l'export (ici on pourrait appeler un endpoint d'export)
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    ElMessage.success('Rapport exporté avec succès')
+  } catch (error) {
+    console.error('Erreur lors de l\'export:', error)
+    ElMessage.error('Erreur lors de l\'export du rapport')
+  } finally {
+    exporting.value = false
+  }
+}
+
+onMounted(() => {
+  loadReports()
+})
 </script>
 
 <style lang="scss" scoped>

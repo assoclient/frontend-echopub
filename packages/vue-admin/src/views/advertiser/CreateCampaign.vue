@@ -42,6 +42,9 @@
                 style="width: 100%"
                 placeholder="Calculé automatiquement"
               />
+              <div class="form-tip">
+                Basé sur un CPV de {{ advertiserCPV }} FCFA (Budget ÷ CPV = {{ form.budget }} ÷ {{ advertiserCPV }} = {{ Math.floor(form.budget / advertiserCPV) }} vues)
+              </div>
             </el-form-item>
           </el-col>
         </el-row>
@@ -118,17 +121,71 @@
             :auto-upload="false"
             :on-change="handleMediaChange"
             :limit="1"
+            :file-list="fileList"
+            :disabled="validatingVideo"
           >
-            <el-button type="primary">
+            <el-button type="primary" :loading="validatingVideo">
               <el-icon><Upload /></el-icon>
-              Sélectionner une image/vidéo
+              {{ validatingVideo ? 'Validation de la vidéo...' : 'Sélectionner une image/vidéo' }}
             </el-button>
             <template #tip>
               <div class="el-upload__tip">
-                Formats acceptés: JPG, PNG, MP4. Taille max: 10MB
+                Formats acceptés: JPG, PNG, MP4. Taille max: 10MB. Vidéos: max 30 secondes
               </div>
             </template>
           </el-upload>
+          
+          <!-- Indicateur de validation vidéo -->
+          <div v-if="validatingVideo" class="video-validation-indicator">
+            <el-icon class="loading-icon"><Loading /></el-icon>
+            <span>Validation de la durée de la vidéo...</span>
+          </div>
+          
+          <!-- Prévisualisation du média -->
+          <div v-if="mediaPreview" class="media-preview-section">
+            <h4>Aperçu du média</h4>
+            <div class="media-preview-container">
+              <!-- Prévisualisation pour les images -->
+              <div v-if="!isVideo(mediaPreview)" class="image-preview">
+                <img 
+                  :src="mediaPreview" 
+                  :alt="form.title || 'Aperçu du média'"
+                  class="preview-image"
+                />
+                <div class="preview-overlay">
+                  <el-button 
+                    type="text" 
+                    @click="removeMedia"
+                    class="remove-button"
+                  >
+                    <el-icon><Delete /></el-icon>
+                    Supprimer
+                  </el-button>
+                </div>
+              </div>
+              
+              <!-- Prévisualisation pour les vidéos -->
+              <div v-else class="video-preview">
+                <video 
+                  :src="mediaPreview" 
+                  controls 
+                  class="preview-video"
+                >
+                  Votre navigateur ne supporte pas la lecture de vidéos.
+                </video>
+                <div class="preview-overlay">
+                  <el-button 
+                    type="text" 
+                    @click="removeMedia"
+                    class="remove-button"
+                  >
+                    <el-icon><Delete /></el-icon>
+                    Supprimer
+                  </el-button>
+                </div>
+              </div>
+            </div>
+          </div>
         </el-form-item>
 
         <el-form-item>
@@ -147,13 +204,18 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Upload } from '@element-plus/icons-vue'
+import { Upload, Delete, Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { campaignService, settingsService } from '@/services/api'
 import citiesData from '@/assets/cities_cm.json'
 
 const router = useRouter()
 const campaignForm = ref(null)
 const loading = ref(false)
+const fileList = ref([])
+const advertiserCPV = ref(14) // CPV par défaut
+const mediaPreview = ref('') // URL de prévisualisation du média
+const validatingVideo = ref(false) // Indicateur de validation vidéo
 
 const form = reactive({
   title: '',
@@ -166,29 +228,56 @@ const form = reactive({
   estimatedViews: 0
 })
 
+// Charger les paramètres de la plateforme pour récupérer le CPV
+const loadPlatformSettings = async () => {
+  try {
+    const response = await settingsService.getSettings()
+    const settings = response.data
+    advertiserCPV.value = settings.payment?.cpv || 14
+    console.log('📊 CPV annonceur chargé:', advertiserCPV.value)
+  } catch (error) {
+    console.error('Erreur lors du chargement des paramètres:', error)
+    // Utiliser la valeur par défaut en cas d'erreur
+    advertiserCPV.value = 14
+  }
+}
+
 // Watcher pour vider les localisations quand on change le type
 watch(() => form.locationType, () => {
   form.targetLocations = []
 })
 
-// Watcher pour calculer l'estimation des vues basée sur le budget
+// Watcher pour calculer l'estimation des vues basée sur le budget et le CPV
 watch(() => form.budget, (newBudget) => {
-  // Calcul simple : 1 FCFA = 1 vue (à ajuster selon votre logique métier)
-  form.estimatedViews = Math.floor(newBudget / 1)
+  // Calcul : Budget / CPV annonceur = Nombre de vues estimées
+  form.estimatedViews = Math.floor(newBudget / advertiserCPV.value)
 }, { immediate: true })
+
+// Watcher pour recalculer quand le CPV change
+watch(() => advertiserCPV.value, () => {
+  form.estimatedViews = Math.floor(form.budget / advertiserCPV.value)
+})
 
 const rules = {
   title: [
-    { required: true, message: 'Le titre est requis', trigger: 'blur' }
+    { required: true, message: 'Le titre est requis', trigger: 'blur' },
+    { min: 3, max: 100, message: 'Le titre doit contenir entre 3 et 100 caractères', trigger: 'blur' }
+  ],
+  description: [
+    { required: true, message: 'La description est requise', trigger: 'blur' },
+    { min: 10, max: 500, message: 'La description doit contenir entre 10 et 500 caractères', trigger: 'blur' }
   ],
   budget: [
-    { required: true, message: 'Le budget est requis', trigger: 'blur' }
+    { required: true, message: 'Le budget est requis', trigger: 'blur' },
+    { type: 'number', min: 10000, message: 'Le budget minimum est de 10 000 FCFA', trigger: 'blur' }
   ],
   targetLocations: [
-    { required: true, message: 'Sélectionnez au moins une localisation', trigger: 'change' }
+    { required: true, message: 'Sélectionnez au moins une localisation', trigger: 'change' },
+    { type: 'array', min: 1, message: 'Sélectionnez au moins une localisation', trigger: 'change' }
   ],
   targetLink: [
-    { required: true, message: 'Le lien cible est requis', trigger: 'blur' }
+    { required: true, message: 'Le lien cible est requis', trigger: 'blur' },
+    { type: 'url', message: 'Veuillez entrer une URL valide commençant par http:// ou https://', trigger: 'blur' }
   ]
 }
 
@@ -222,28 +311,205 @@ const uniqueRegions = computed(() => {
 });
 
 const handleMediaChange = (file) => {
+  console.log('📁 Fichier sélectionné:', file)
+  
+  // Validation du fichier
+  const isValidType = ['image/jpeg', 'image/png', 'image/jpg', 'video/mp4'].includes(file.raw.type)
+  const isValidSize = file.raw.size / 1024 / 1024 < 10 // 10MB max
+  
+  if (!isValidType) {
+    ElMessage.error('Format de fichier non supporté. Utilisez JPG, PNG ou MP4.')
+    return false
+  }
+  
+  if (!isValidSize) {
+    ElMessage.error('Fichier trop volumineux. Taille maximum: 10MB.')
+    return false
+  }
+  
+  // Si c'est une vidéo, vérifier la durée
+  if (file.raw.type === 'video/mp4') {
+    validateVideoDuration(file.raw)
+    return false
+  }
+  
+  // Pour les images, procéder normalement
   form.media = file.raw
+  fileList.value = [file]
+  
+  // Créer l'URL de prévisualisation
+  mediaPreview.value = URL.createObjectURL(file.raw)
+  
+  return false // Empêcher l'upload automatique
+}
+
+// Valider la durée de la vidéo
+const validateVideoDuration = (videoFile) => {
+  validatingVideo.value = true
+  
+  const video = document.createElement('video')
+  video.preload = 'metadata'
+  
+  video.onloadedmetadata = () => {
+    // Libérer l'URL pour éviter les fuites mémoire
+    URL.revokeObjectURL(video.src)
+    
+    const duration = video.duration
+    console.log('⏱️ Durée de la vidéo:', duration, 'secondes')
+    
+    if (duration > 30) {
+      ElMessage.error('La vidéo dépasse 30 secondes. Durée maximum autorisée: 30 secondes.')
+      validatingVideo.value = false
+      return
+    }
+    
+    // Vidéo valide, l'ajouter au formulaire
+    form.media = videoFile
+    fileList.value = [{ raw: videoFile, name: videoFile.name }]
+    
+    // Créer l'URL de prévisualisation
+    mediaPreview.value = URL.createObjectURL(videoFile)
+    
+    ElMessage.success('Vidéo validée avec succès !')
+    validatingVideo.value = false
+  }
+  
+  video.onerror = () => {
+    ElMessage.error('Erreur lors de la lecture de la vidéo. Veuillez réessayer.')
+    URL.revokeObjectURL(video.src)
+    validatingVideo.value = false
+  }
+  
+  // Créer une URL temporaire pour la vidéo
+  const videoURL = URL.createObjectURL(videoFile)
+  video.src = videoURL
+}
+
+// Supprimer le média sélectionné
+const removeMedia = () => {
+  form.media = null
+  fileList.value = []
+  mediaPreview.value = ''
+  
+  // Libérer l'URL de prévisualisation
+  if (mediaPreview.value) {
+    URL.revokeObjectURL(mediaPreview.value)
+  }
+}
+
+// Vérifier si c'est une vidéo
+const isVideo = (url) => {
+  if (!url) return false
+  const videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm']
+  return videoExtensions.some(ext => url.toLowerCase().includes(ext))
 }
 
 const submitCampaign = async () => {
   if (!campaignForm.value) return
   
   try {
+    // Validation du formulaire
     await campaignForm.value.validate()
+    
+    // Validation supplémentaire pour les vidéos
+    if (form.media && form.media.type === 'video/mp4') {
+      // Vérifier que la vidéo a été validée (pas de validation en double)
+      if (!mediaPreview.value) {
+        ElMessage.error('Veuillez attendre la validation de la vidéo avant de soumettre.')
+        return
+      }
+    }
+    
     loading.value = true
     
-    // Simulation d'un appel API
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    console.log('🚀 Création de campagne avec données:', form)
     
-    ElMessage.success('Campagne créée avec succès')
+    // Préparer les données pour l'API selon le format attendu par le backend
+    const campaignData = {
+      title: form.title,
+      description: form.description,
+      budget: form.budget,
+      target_link: form.targetLink,
+      location_type: form.locationType,
+      target_location: form.targetLocations.map(location => ({ value: location })),
+      expected_views: form.estimatedViews,
+      status: 'draft', // Par défaut en brouillon
+      // Champs optionnels selon le modèle backend
+      start_date: new Date().toISOString(),
+      end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // +30 jours
+    }
+    
+    console.log('📋 Données à envoyer:', campaignData)
+    
+    let response
+    
+    // Si un fichier média est sélectionné, utiliser FormData
+    if (form.media) {
+      console.log('📁 Upload avec fichier média...')
+      
+      const formData = new FormData()
+      
+      // Ajouter le fichier média
+      formData.append('media', form.media)
+      
+      // Ajouter les données JSON
+      formData.append('data', JSON.stringify(campaignData))
+      
+      // Appel API avec FormData
+      response = await campaignService.createCampaignWithMedia(formData)
+    } else {
+      console.log('📋 Création sans fichier média...')
+      
+      // Appel API standard sans fichier
+      response = await campaignService.createCampaign(campaignData)
+    }
+    
+    console.log('✅ Réponse API création:', response)
+    
+    ElMessage.success('Campagne créée avec succès !')
+    
+    // Redirection vers la liste des campagnes
     router.push('/advertiser/campaigns')
+    
   } catch (error) {
-    console.error('Error creating campaign:', error)
-    ElMessage.error('Erreur lors de la création de la campagne')
+    console.error('❌ Erreur lors de la création de la campagne:', error)
+    
+    // Gestion des erreurs spécifiques
+    if (error.response?.data?.message) {
+      ElMessage.error(error.response.data.message)
+    } else if (error.response?.status === 400) {
+      ElMessage.error('Données invalides. Vérifiez les informations saisies.')
+    } else if (error.response?.status === 401) {
+      ElMessage.error('Session expirée. Veuillez vous reconnecter.')
+      router.push('/login/advertiser')
+    } else if (error.response?.status === 403) {
+      ElMessage.error('Vous n\'avez pas les permissions pour créer une campagne.')
+    } else {
+      ElMessage.error('Erreur lors de la création de la campagne. Veuillez réessayer.')
+    }
   } finally {
     loading.value = false
   }
 }
+
+// Validation personnalisée pour l'URL
+const validateUrl = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error('Le lien cible est requis'))
+  } else if (!/^https?:\/\/.+/.test(value)) {
+    callback(new Error('Veuillez entrer une URL valide commençant par http:// ou https://'))
+  } else {
+    callback()
+  }
+}
+
+// Ajouter la validation d'URL aux règles
+rules.targetLink.push({ validator: validateUrl, trigger: 'blur' })
+
+// Charger les paramètres au montage du composant
+onMounted(async () => {
+  await loadPlatformSettings()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -257,6 +523,113 @@ const submitCampaign = async () => {
       color: var(--dark-grey);
       opacity: 0.7;
     }
+  }
+
+  .video-validation-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 12px;
+    background: var(--light-grey);
+    border-radius: 8px;
+    color: var(--primary-blue);
+    font-size: 14px;
+    
+    .loading-icon {
+      animation: rotate 1s linear infinite;
+      font-size: 16px;
+    }
+    
+    span {
+      font-weight: 500;
+    }
+  }
+
+  .form-tip {
+    font-size: 12px;
+    color: var(--dark-grey);
+    opacity: 0.7;
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  .media-preview-section {
+    margin-top: 16px;
+    
+    h4 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dark-grey);
+    }
+    
+    .media-preview-container {
+      border: 1px solid var(--light-grey);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--light-grey);
+      
+      .image-preview,
+      .video-preview {
+        position: relative;
+        max-width: 300px;
+        max-height: 200px;
+        
+        .preview-image {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+          display: block;
+        }
+        
+        .preview-video {
+          width: 100%;
+          max-height: 200px;
+          display: block;
+        }
+        
+        .preview-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.6);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          
+          &:hover {
+            opacity: 1;
+          }
+          
+          .remove-button {
+            color: white;
+            font-size: 14px;
+            
+            .el-icon {
+              margin-right: 4px;
+            }
+          }
+        }
+        
+        &:hover .preview-overlay {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 </style> 
