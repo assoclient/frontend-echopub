@@ -26,5 +26,14 @@ packages/service/.vs
 packages/testing/pids.json
 packages/testing/screenshots
 packages/testing/testing
+# Environment files
 .env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+.env.*
+!.env.example
+
 swa-cli.config.json
