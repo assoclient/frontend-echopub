@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  # EchoPub Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: echopub_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - echopub_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  echopub_network:
+    driver: bridge
+    external: true
