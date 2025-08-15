@@ -26,6 +26,7 @@ FROM nginx:alpine AS production
 COPY --from=builder /app/packages/vue-admin/dist /usr/share/nginx/html
 
 COPY ./.docker/start.sh /usr/local/bin/start.sh
+COPY nginx.conf /etc/nginx/nginx.conf
 RUN chmod +x /usr/local/bin/start.sh
 
 # Expose port
