@@ -12,7 +12,7 @@
         <el-form
           ref="registerForm"
           :model="form"
-          :rules="rules"
+          :rules="rules" 
           class="register-form"
           @submit.prevent="handleRegister"
         >
