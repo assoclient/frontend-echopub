@@ -348,19 +348,19 @@ const generalRules = {
 const paymentRules = {
   cpv: [
     { required: true, message: 'Le CPV annonceur est requis', trigger: 'blur' },
-    { type: 'number', min: 10, max: 100, message: 'Le CPV annonceur doit être entre 10 et 100 FCFA', trigger: 'blur' }
+    { type: 'number', min: 2, max: 100, message: 'Le CPV annonceur doit être entre 10 et 100 FCFA', trigger: 'blur' }
   ],
   cpv_ambassador: [
     { required: true, message: 'Le CPV ambassadeur est requis', trigger: 'blur' },
-    { type: 'number', min: 5, max: 50, message: 'Le CPV ambassadeur doit être entre 5 et 50 FCFA', trigger: 'blur' }
+    { type: 'number', min: 1, max: 50, message: 'Le CPV ambassadeur doit être entre 5 et 50 FCFA', trigger: 'blur' }
   ],
   minCampaignAmount: [
     { required: true, message: 'Le montant minimum est requis', trigger: 'blur' },
-    { type: 'number', min: 1000, message: 'Le montant minimum doit être d\'au moins 1000 FCFA', trigger: 'blur' }
+    { type: 'number', min: 100, message: 'Le montant minimum doit être d\'au moins 1000 FCFA', trigger: 'blur' }
   ],
   maxCampaignAmount: [
     { required: true, message: 'Le montant maximum est requis', trigger: 'blur' },
-    { type: 'number', min: 10000, message: 'Le montant maximum doit être d\'au moins 10000 FCFA', trigger: 'blur' }
+    { type: 'number', min: 1000000, message: 'Le montant maximum doit être d\'au moins 10000 FCFA', trigger: 'blur' }
   ]
 }
 
