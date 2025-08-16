@@ -14,7 +14,7 @@
           :model="form"
           :rules="rules" 
           class="register-form"
-          @submit.prevent="handleRegister"
+          @submit.prevent="handleRegister" 
         >
           <el-form-item prop="name">
             <el-input
