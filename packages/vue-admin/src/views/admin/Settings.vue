@@ -67,7 +67,7 @@
           <el-form-item label="CPV annonceur (FCFA)" prop="cpv">
             <el-input-number 
               v-model="paymentSettings.cpv" 
-              :min="10" 
+              :min="2" 
               :max="100" 
               :step="1"
               style="width: 100%"
@@ -78,7 +78,7 @@
           <el-form-item label="CPV ambassadeur (FCFA)" prop="cpv_ambassador">
             <el-input-number 
               v-model="paymentSettings.cpv_ambassador" 
-              :min="5" 
+              :min="1" 
               :max="50" 
               :step="1"
               style="width: 100%"
@@ -98,8 +98,8 @@
           <el-form-item label="Montant minimum campagne" prop="minCampaignAmount">
             <el-input-number 
               v-model="paymentSettings.minCampaignAmount" 
-              :min="1000" 
-              :step="1000"
+              :min="100" 
+              :step="100"
               style="width: 100%"
             />
           </el-form-item>
@@ -107,8 +107,8 @@
           <el-form-item label="Montant maximum campagne" prop="maxCampaignAmount">
             <el-input-number 
               v-model="paymentSettings.maxCampaignAmount" 
-              :min="10000" 
-              :step="10000"
+              :min="1000000" 
+              :step="1000000"
               style="width: 100%"
             />
           </el-form-item>
