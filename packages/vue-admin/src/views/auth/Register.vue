@@ -17,7 +17,7 @@
           @submit.prevent="handleRegister" 
         >
           <el-form-item prop="name">
-            <el-input
+            <el-input 
               v-model="form.name"
               placeholder="Nom complet"
               size="large"
