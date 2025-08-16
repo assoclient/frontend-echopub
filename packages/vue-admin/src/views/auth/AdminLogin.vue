@@ -3,6 +3,7 @@
     <div class="login-container">
       <div class="login-card">
         <div class="login-header">
+                    <img src="/assets/logobg1.png" width="150" alt="Logo" class="logo" />
           <h2>Connexion Administrateur</h2>
           <p>Accédez au panneau d'administration</p>
         </div>

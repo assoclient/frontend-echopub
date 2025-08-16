@@ -19,7 +19,7 @@
       <div class="hero-slider">
         <!-- Slide 1: Annonceurs -->
         <div class="hero-slide" :class="{ active: currentSlide === 0 }">
-          <div class="hero-container">
+          <div class="hero-container1">
             <div class="hero-content">
               <h1>Boostez vos campagnes publicitaires</h1>
               <p>Connectez-vous avec des ambassadeurs qualifiés et multipliez l'impact de vos campagnes marketing grâce à notre plateforme innovante.</p>
@@ -32,11 +32,11 @@
                 </el-button>
               </div>
             </div>
-            <div class="hero-image">
+            <!-- <div class="hero-image">
               <img src="/assets/phone_landing-removebg-preview.png" 
               alt="Hero Image" class="hero-image-img">
             
-            </div>
+            </div> -->
           </div>
         </div>
 
@@ -47,7 +47,7 @@
               <h1>Gagnez en partageant du contenu</h1>
               <p>Rejoignez notre communauté d'ambassadeurs et monétisez votre influence en promouvant des marques qui vous correspondent.</p>
               <div class="hero-buttons">
-                <el-button type="primary" size="large" @click="goToRegister">
+                <el-button type="primary" size="large" @click="goToDownloadSection">
                   Devenir ambassadeur
                 </el-button>
                 <el-button size="large" @click="scrollToFeatures">
@@ -55,10 +55,10 @@
                 </el-button>
               </div>
             </div>
-            <div class="hero-image">
+           <!--  <div class="hero-image">
               <img src="/assets/phone_landing1-removebg-preview.png" 
               alt="Hero Image" class="hero-image-img">
-            </div>
+            </div> -->
           </div>
         </div>
 
@@ -121,12 +121,68 @@
             <h3>Géolocalisation</h3>
             <p>Ciblez des zones géographiques spécifiques pour maximiser l'impact de vos campagnes.</p>
           </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <el-icon><List /></el-icon>
+            </div>
+            <h3>Contenu diversifié</h3>
+            <p>Partager du texte, des images(Flyers) et des courtes vidéos de 30s.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" ref="faq">
+      <div class="container">
+        <h2>Questions Fréquemment Posées</h2>
+        <div class="faq-container">
+          <div class="faq-item" v-for="(item, index) in faqItems" :key="index">
+            <div class="faq-question" @click="toggleFaq(index)">
+              <h3>{{ item.question }}</h3>
+              <el-icon class="faq-icon" :class="{ 'rotated': item.isOpen }">
+                <ArrowDown />
+              </el-icon>
+            </div>
+            <div class="faq-answer" :class="{ 'open': item.isOpen }">
+              <p>{{ item.answer }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" ref="testimonials">
+      <div class="container">
+        <h2>Ce que disent nos utilisateurs</h2>
+        <div class="testimonials-grid">
+          <div class="testimonial-card" v-for="(testimonial, index) in testimonials" :key="index">
+            <div class="testimonial-content">
+              <div class="testimonial-stars">
+                <el-icon v-for="star in 5" :key="star" class="star-icon">
+                  <Star color="var(--yellow)" />
+                </el-icon>
+              </div>
+              <p class="testimonial-text">"{{ testimonial.text }}"</p>
+              <div class="testimonial-author">
+                <div class="author-avatar">
+                  <img :src="testimonial.avatar" :alt="testimonial.name" />
+                </div>
+                <div class="author-info">
+                  <h4>{{ testimonial.name }}</h4>
+                  <span>{{ testimonial.role }}</span>
+                  <span class="company">{{ testimonial.company }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- Download Section -->
-    <section class="download">
+    <section class="download" ref="download">
       <div class="container">
         <h2>Téléchargez l'application mobile</h2>
         <p>Accédez à EchoPub depuis votre smartphone et gérez vos campagnes en déplacement.</p>
@@ -186,7 +242,9 @@
           <div class="footer-section">
             <h4>Produit</h4>
             <ul>
-              <li><a href="#" @click="scrollToFeatures">Fonctionnalités</a></li>
+              <li><a style="cursor: pointer;" @click="scrollToFeatures">Fonctionnalités</a></li>
+              <li><a style="cursor: pointer;" @click="scrollToFaq">FAQ</a></li>
+              <li><a style="cursor: pointer;" @click="scrollToTestimonials">Témoignages</a></li>
               <li><a href="#" @click="goToRegister">Créer un compte</a></li>
               <li><a href="#" @click="goToLogin">Se connecter</a></li>
             </ul>
@@ -194,16 +252,16 @@
           <div class="footer-section">
             <h4>Support</h4>
             <ul>
-              <li><a href="#">Centre d'aide</a></li>
-              <li><a href="#">Contact</a></li>
-              <li><a href="#">FAQ</a></li>
+             <!--  <li><a href="#">Centre d'aide</a></li> -->
+              <li><a href="#">Contact: +237 694071931</a></li>
+              <li><a style="cursor: pointer;" @click="scrollToFaq">FAQ</a></li>
             </ul>
           </div>
           <div class="footer-section">
             <h4>Légal</h4>
             <ul>
               <li><a href="#">Conditions d'utilisation</a></li>
-              <li><a href="#">Politique de confidentialité</a></li>
+              <li><router-link to="/privacy-policy">Politique de confidentialité</router-link></li>
             </ul>
           </div>
         </div>
@@ -216,7 +274,7 @@
 </template>
 
 <script>
-import { TrendCharts, User, Money, Location, Apple, Android, ArrowRight, ArrowLeft } from '@element-plus/icons-vue'
+import { TrendCharts, User, Money, Location, Apple, Android, ArrowRight, ArrowLeft, ArrowDown, Star, List } from '@element-plus/icons-vue'
 
 export default {
   name: 'LandingPage',
@@ -228,12 +286,64 @@ export default {
     Apple,
     Android,
     ArrowRight,
-    ArrowLeft
+    ArrowLeft,
+    ArrowDown,
+    Star
   },
   data() {
     return {
       currentSlide: 0,
-      autoPlayInterval: null
+      autoPlayInterval: null,
+      faqItems: [
+        {
+          question: 'Qu\'est-ce que EchoPub ?',
+          answer: 'EchoPub est une plateforme innovante de marketing d\'influence qui permet aux annonceurs de créer et de gérer leurs campagnes publicitaires, tout en bénéficiant de l\'expertise et de l\'influence de leurs ambassadeurs. Nous offrons une solution complète pour la promotion et la diffusion de vos messages.',
+          isOpen: true
+        },
+        {
+          question: 'Comment puis-je devenir ambassadeur ?',
+          answer: 'Pour devenir ambassadeur, vous devez vous inscrire sur notre application mobile uniquement avec votre numéro whatsapp. Une fois validé, vous pourrez commencer à partager du contenu, à gérer vos campagnes et à générer des revenus.',
+          isOpen: true
+        },
+        {
+          question: 'Quels sont les avantages d\'utiliser EchoPub ?',
+          answer: 'L\'utilisation d\'EchoPub offre de nombreux avantages, notamment la possibilité de cibler des audiences précises, de suivre les performances de vos campagnes en temps réel, et de bénéficier d\'un système de paiement sécurisé et instantané.',
+          isOpen: true
+        },
+        {
+          question: 'La plateforme est-elle sécurisée ?',
+          answer: 'Oui, EchoPub est conçue avec des normes de sécurité strictes. Nous utilisons des protocoles de cryptage de bout en bout et des méthodes de sécurisation des données pour assurer la confidentialité et l\'intégrité de vos informations.',
+          isOpen: true
+        },
+        {
+          question: 'Comment puis-je me désinscrire ?',
+          answer: 'Vous pouvez vous désinscrire à tout moment en contactant notre équipe de support. Nous nous efforçons de vous offrir une expérience fluide et personnalisée.',
+          isOpen: true
+        }
+      ],
+      testimonials: [
+        {
+          text: 'J’ai lancé une promo sur mes produits et, en deux jours, plus de 3 000 personnes l’avaient vue sur WhatsApp. Résultat : mes ventes ont doublé cette semaine.',
+          name: 'Ondoua Martin',
+          role: 'Marketing Manager',
+          company: 'Tech Solutions Inc.',
+          avatar: '/assets/testimonials/avatar1.jpg'
+        },
+        {
+          text: 'Quand les gens voient un événement partagé par leurs proches, ils s’y intéressent beaucoup plus. Grâce aux ambassadeurs locaux, mes soirées affichent complet sans avoir collé une seule affiche.',
+          name: 'Mr Abakar',
+          role: 'Promoteur de spectacles',
+          company: 'Abakar Events',
+          avatar: '/assets/testimonials/avatar1.jpg'
+        },
+        {
+          text: 'La force de cette plateforme, c’est que vos messages ne viennent pas d’une marque inconnue, mais des statuts des proches de votre audience. C’est du bouche-à-oreille digital, avec un impact direct et mesurable.',
+          name: 'Mr Njikam',
+          role: 'Promoteur de produits',
+          company: 'Ets La lissière',
+          avatar: '/assets/testimonials/avatar1.jpg'
+        }
+      ]
     }
   },
   mounted() {
@@ -258,7 +368,7 @@ export default {
     startAutoPlay() {
       this.autoPlayInterval = setInterval(() => {
         this.nextSlide()
-      }, 5000) // Change slide every 5 seconds
+      }, 8000) // Change slide every 5 seconds
     },
     stopAutoPlay() {
       if (this.autoPlayInterval) {
@@ -272,10 +382,20 @@ export default {
       this.$router.push('/login/advertiser')
     },
     goToRegister() {
+      window.href = '#do'
       this.$router.push('/register')
+    },
+    goToDownloadSection() {
+      this.$refs.download.scrollIntoView({ behavior: 'smooth' })
     },
     scrollToFeatures() {
       this.$refs.features.scrollIntoView({ behavior: 'smooth' })
+    },
+    scrollToFaq() {
+      this.$refs.faq.scrollIntoView({ behavior: 'smooth' })
+    },
+    scrollToTestimonials() {
+      this.$refs.testimonials.scrollIntoView({ behavior: 'smooth' })
     },
     downloadIOS() {
       // Simuler le téléchargement iOS
@@ -287,6 +407,9 @@ export default {
     },
     goToAdminLogin() {
       this.$router.push('/login/admin')
+    },
+    toggleFaq(index) {
+      this.faqItems[index].isOpen = !this.faqItems[index].isOpen;
     }
   }
 }
@@ -358,11 +481,11 @@ export default {
 
 // Hero Section
 .hero {
-  padding: 60px 0 120px;
+  padding: 0px 0 80px;
   color: white;
   position: relative;
   overflow: hidden;
-  min-height: 800px;
+  min-height: 100vh;
 
   .hero-slider {
     position: relative;
@@ -379,7 +502,7 @@ export default {
     opacity: 0;
     transition: opacity 0.8s ease-in-out;
     pointer-events: none;
-    padding: 120px 0 80px;
+    padding: 80px 0 80px ;
 
     &.active {
       opacity: 1;
@@ -388,9 +511,14 @@ export default {
   }
 
   .hero-container {
-    max-width: 1200px;
+    height: 100vh;
+    background-image: url('../../public/assets/banner/banner.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 0 2rem;
+    padding: 0 1rem;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 4rem;
@@ -417,6 +545,7 @@ export default {
       }
 
       .hero-buttons {
+        padding-bottom: 80px;
         display: flex;
         gap: 1rem;
         flex-wrap: wrap;
@@ -434,121 +563,65 @@ export default {
           height: 50%;
           object-fit: cover;
         }
-      .app-mockup {
-        position: relative;
-        
-        &.advertiser-mockup {
-          .app-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 8px 8px 0 0;
-            text-align: center;
-            
-            .header-icon {
-              font-size: 24px;
-              margin-bottom: 5px;
-            }
-            
-            .header-title {
-              font-weight: 600;
-              font-size: 14px;
-            }
-          }
-        }
-        
-        &.ambassador-mockup {
-          .app-header {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 8px 8px 0 0;
-            text-align: center;
-            
-            .header-icon {
-              font-size: 24px;
-              margin-bottom: 5px;
-            }
-            
-            .header-title {
-              font-weight: 600;
-              font-size: 14px;
-            }
-          }
-        }
-        
-        .phone-mockup {
-          width: 260px;
-          height: 520px;
-          background: #000;
-          border-radius: 30px;
-          padding: 8px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-          margin: 0 auto;
-
-          .screen {
-            width: 100%;
-            height: 100%;
-            background: white;
-            border-radius: 22px;
-            overflow: hidden;
-
-            .app-content {
-              height: 100%;
-              background: var(--light-grey);
-
-              .app-header {
-                height: 60px;
-                background: var(--primary-blue);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-weight: 600;
-              }
-
-              .app-body {
-                padding: 1rem;
-
-                .campaign-card {
-                  height: 80px;
-                  background: white;
-                  border-radius: 8px;
-                  margin-bottom: 1rem;
-                  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                  padding: 12px;
-                  display: flex;
-                  flex-direction: column;
-                  justify-content: space-between;
-
-                  .card-header {
-                    font-weight: 600;
-                    color: var(--primary-blue);
-                    font-size: 14px;
-                    margin-bottom: 8px;
-                  }
-
-                  .card-stats {
-                    display: flex;
-                    justify-content: space-between;
-                    font-size: 12px;
-                    color: var(--dark-grey);
-
-                    span {
-                      display: flex;
-                      align-items: center;
-                      gap: 4px;
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      
     }
   }
+  .hero-container1 {
+    height: 100vh;
+    background-image: url('../../public/assets/banner/banner1.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    min-height: 0px;
+    position: relative;
+    z-index: 1;
 
+    .hero-content {
+      h1 {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+        animation: slideInLeft 0.8s ease-out;
+      }
+
+      p {
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+        line-height: 1.6;
+        animation: slideInLeft 0.8s ease-out 0.2s both;
+      }
+
+      .hero-buttons {
+        padding-bottom: 80px;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        animation: slideInLeft 0.8s ease-out 0.4s both;
+      }
+    }
+
+    .hero-image {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: slideInRight 0.8s ease-out 0.3s both;
+        .hero-image-img {
+          width: 50%;
+          height: 50%;
+          object-fit: cover;
+        }
+      
+    }
+  }
   // Slider Navigation
   .slider-dots {
     position: absolute;
@@ -687,6 +760,187 @@ export default {
         p {
           color: var(--dark-grey);
           line-height: 1.6;
+        }
+      }
+    }
+  }
+}
+
+// FAQ Section
+.faq {
+  padding: 80px 0;
+  background: var(--light-grey);
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+
+    h2 {
+      text-align: center;
+      font-size: 2.5rem;
+      color: transparentize($color: #000000, $amount: 0.4);
+      margin-bottom: 3rem;
+    }
+
+    .faq-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+
+      .faq-item {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: max-height 0.5s ease-in-out;
+        cursor: pointer;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .faq-question {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem 2rem;
+          cursor: pointer;
+          background: var(--light-blue);
+          color: white;
+          font-size: 1.25rem;
+          font-weight: 600;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+          transition: background-color 0.3s ease;
+
+          &:hover {
+            background: var(--primary-blue);
+          }
+
+          h3 {
+            margin: 0;
+            font-size: 1.25rem;
+          }
+
+          .faq-icon {
+            transition: transform 0.3s ease;
+            font-size: 1.5rem;
+          }
+
+          &.rotated .faq-icon {
+            transform: rotate(180deg);
+          }
+        }
+
+        .faq-answer {
+          max-height: 0;
+          overflow: hidden;
+          padding: 0 2rem 1.5rem;
+          color: var(--dark-grey);
+          line-height: 1.6;
+          font-size: 1rem;
+          transition: max-height 0.5s ease-in-out;
+
+          &.open {
+            max-height: 500px; /* Adjust as needed */
+          }
+        }
+      }
+    }
+  }
+}
+
+// Testimonials Section
+.testimonials {
+  padding: 80px 0;
+  background: white;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+
+    h2 {
+      text-align: center;
+      font-size: 2.5rem;
+      color: transparentize($color: #000000, $amount: 0.4);
+      margin-bottom: 3rem;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+
+      .testimonial-card {
+        background: var(--light-grey);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+
+        &:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+          background: white;
+        }
+
+        .testimonial-stars {
+          display: flex;
+          gap: 5px;
+          color: transparentize($color: orange, $amount: 0);
+        }
+
+        .testimonial-text {
+          font-style: italic;
+          color: var(--dark-grey);
+          line-height: 1.8;
+          font-size: 1.1rem;
+        }
+
+        .testimonial-author {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+
+          .author-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--primary-blue);
+
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+          }
+
+          .author-info {
+            h4 {
+              color: var(--primary-blue);
+              margin-bottom: 0.5rem;
+            }
+
+            span {
+              display: block;
+              font-size: 0.9rem;
+              color: var(--dark-grey);
+            }
+
+            .company {
+              font-size: 0.8rem;
+              color: var(--light-blue);
+            }
+          }
         }
       }
     }
@@ -883,6 +1137,44 @@ export default {
 
   .features .features-grid {
     grid-template-columns: 1fr;
+  }
+
+  .faq {
+    .faq-container {
+      .faq-item {
+        .faq-question {
+          padding: 1rem 1.5rem;
+          
+          h3 {
+            font-size: 1.1rem;
+          }
+        }
+        
+        .faq-answer {
+          padding: 0 1.5rem 1rem;
+        }
+      }
+    }
+  }
+
+  .testimonials {
+    .testimonials-grid {
+      grid-template-columns: 1fr;
+      
+      .testimonial-card {
+        padding: 1.5rem;
+        
+        .testimonial-author {
+          flex-direction: column;
+          text-align: center;
+          
+          .author-avatar {
+            width: 50px;
+            height: 50px;
+          }
+        }
+      }
+    }
   }
 
   .download .download-buttons {

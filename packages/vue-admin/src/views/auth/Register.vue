@@ -3,6 +3,8 @@
     <div class="register-container">
       <div class="register-card">
         <div class="register-header">
+          <img src="/assets/logobg1.png" width="150" alt="Logo" class="logo" />
+
           <h2>Créer un compte annonceur</h2>
           <p>Rejoignez EchoPub en tant qu'annonceur et commencez vos campagnes</p>
         </div>

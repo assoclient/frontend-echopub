@@ -3,6 +3,8 @@
     <div class="login-container">
       <div class="login-card">
         <div class="login-header">
+          <img src="/assets/logobg1.png" width="150" alt="Logo" class="logo" />
+
           <h2>Connexion Annonceur</h2>
           <p>Accédez à votre espace de gestion des campagnes</p>
         </div>

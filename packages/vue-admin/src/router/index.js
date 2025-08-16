@@ -7,6 +7,7 @@ import AdvertiserLayout from '@/layouts/AdvertiserLayout.vue'
 
 // Pages Public
 import LandingPage from '@/views/LandingPage.vue'
+import PrivacyPolicyPage from '@/views/PrivacyPolicyPage.vue'
 
 // Pages Auth
 import Register from '@/views/auth/Register.vue'
@@ -135,6 +136,11 @@ const routes = [
         component: AdvertiserProfile
       }
     ]
+  },
+  {
+    path: '/privacy-policy',
+    name: 'PrivacyPolicy',
+    component: PrivacyPolicyPage
   }
 ]
 
@@ -232,4 +238,4 @@ router.beforeEach((to, from, next) => {
   next()
 })
 
-export default router 
+export default router
