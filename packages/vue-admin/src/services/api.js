@@ -589,5 +589,15 @@ export const ambassadorCampaignService = {
     }
   }
 }
-
+export const redirectService={
+   updateClicks: async (shortId,ambassadorId) => {
+    try {
+      const response = await api.get(`/publications/add-click/${shortId}/${ambassadorId}`)
+      return response.data
+    } catch (error) {
+      console.error('Erreur lors de la récupération des publications:', error)
+      throw error
+    }
+  }
+}
 export default api 

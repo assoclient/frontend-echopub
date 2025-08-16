@@ -32,6 +32,11 @@ import AdvertiserProfile from '@/views/advertiser/Profile.vue'
 
 const routes = [
   {
+  path: '/redirect/:param1/:param2',
+  name: 'Redirect',
+  component: () => import('@/views/Redirect.vue')
+},
+  {
     path: '/',
     name: 'LandingPage',
     component: LandingPage,

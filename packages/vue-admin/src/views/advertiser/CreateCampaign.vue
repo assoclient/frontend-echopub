@@ -143,10 +143,10 @@
           
           <!-- Prévisualisation du média -->
           <div v-if="mediaPreview" class="media-preview-section">
-            <h4>Aperçu du média</h4>
+            <h4>Aperçu du média{{ isVideo(form.media)?'(Video)':'(Image)' }}</h4>
             <div class="media-preview-container">
               <!-- Prévisualisation pour les images -->
-              <div v-if="!isVideo(mediaPreview)" class="image-preview">
+              <div v-if="!isVideo(form.media)" class="image-preview">
                 <img 
                   :src="mediaPreview" 
                   :alt="form.title || 'Aperçu du média'"
@@ -188,6 +188,33 @@
           </div>
         </el-form-item>
 
+        <el-row :gutter="24">
+          <el-col :span="12">
+            <el-form-item label="Date de début" prop="startDate">
+              <el-date-picker
+                v-model="form.startDate"
+                type="date"
+                placeholder="Sélectionnez la date de début"
+                style="width: 100%"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="Date de fin" prop="endDate">
+              <el-date-picker
+                v-model="form.endDate"
+                type="date"
+                placeholder="Sélectionnez la date de fin"
+                style="width: 100%"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
         <el-form-item>
           <el-button type="primary" @click="submitCampaign" :loading="loading">
             Créer la campagne
@@ -225,7 +252,9 @@ const form = reactive({
   targetLocations: [],
   targetLink: '',
   media: null,
-  estimatedViews: 0
+  estimatedViews: 0,
+  startDate: '',
+  endDate: ''
 })
 
 // Charger les paramètres de la plateforme pour récupérer le CPV
@@ -278,6 +307,24 @@ const rules = {
   targetLink: [
     { required: true, message: 'Le lien cible est requis', trigger: 'blur' },
     { type: 'url', message: 'Veuillez entrer une URL valide commençant par http:// ou https://', trigger: 'blur' }
+  ],
+  startDate: [
+    { required: true, message: 'La date de début est requise', trigger: 'change' }
+  ],
+  endDate: [
+    { required: true, message: 'La date de fin est requise', trigger: 'change' },
+    {
+      validator: (rule, value, callback) => {
+        if (!value) {
+          callback(new Error('La date de fin est requise'));
+        } else if (form.startDate && value < form.startDate) {
+          callback(new Error('La date de fin ne peut pas être antérieure à la date de début'));
+        } else {
+          callback();
+        }
+      },
+      trigger: 'change'
+    }
   ]
 }
 
@@ -315,7 +362,7 @@ const handleMediaChange = (file) => {
   
   // Validation du fichier
   const isValidType = ['image/jpeg', 'image/png', 'image/jpg', 'video/mp4'].includes(file.raw.type)
-  const isValidSize = file.raw.size / 1024 / 1024 < 10 // 10MB max
+  const isValidSize = file.raw.size / 1024 / 1024 < 80 // 80MB max
   
   if (!isValidType) {
     ElMessage.error('Format de fichier non supporté. Utilisez JPG, PNG ou MP4.')
@@ -398,10 +445,12 @@ const removeMedia = () => {
 }
 
 // Vérifier si c'est une vidéo
-const isVideo = (url) => {
-  if (!url) return false
+const isVideo = (file) => {
+  console.log('🔍 Vérification du type de média:', file);
+  
+  if (!file) return false
   const videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm']
-  return videoExtensions.some(ext => url.toLowerCase().includes(ext))
+  return videoExtensions.some(ext => file.name?.toLowerCase().includes(ext))
 }
 
 const submitCampaign = async () => {
@@ -412,7 +461,7 @@ const submitCampaign = async () => {
     await campaignForm.value.validate()
     
     // Validation supplémentaire pour les vidéos
-    if (form.media && form.media.type === 'video/mp4') {
+    if (form.media && (form.media.type === 'video/mp4'|| form.media.type === 'video/webm'|| form.media.type === 'video/avi'|| form.media.type === 'video/mov')) {
       // Vérifier que la vidéo a été validée (pas de validation en double)
       if (!mediaPreview.value) {
         ElMessage.error('Veuillez attendre la validation de la vidéo avant de soumettre.')
@@ -435,8 +484,8 @@ const submitCampaign = async () => {
       expected_views: form.estimatedViews,
       status: 'draft', // Par défaut en brouillon
       // Champs optionnels selon le modèle backend
-      start_date: new Date().toISOString(),
-      end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // +30 jours
+      start_date: form.startDate || new Date().toISOString(), // Date actuelle si non spécifiée
+      end_date: form.endDate// +30 jours
     }
     
     console.log('📋 Données à envoyer:', campaignData)
@@ -632,4 +681,4 @@ onMounted(async () => {
     transform: rotate(360deg);
   }
 }
-</style> 
+</style>

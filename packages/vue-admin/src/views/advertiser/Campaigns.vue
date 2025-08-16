@@ -1516,7 +1516,7 @@ onMounted(async () => {
   await loadPlatformSettings()
   loadCampaigns()
 })
-
+   
 // Surveiller les changements de filtres pour recharger
 watch([searchQuery, statusFilter, sortBy], () => {
   if (currentPage.value === 1) {
