@@ -18,7 +18,7 @@
         >
           <el-form-item prop="name">
             <el-input 
-              v-model="form.name"
+              v-model="form.name" 
               placeholder="Nom complet"
               size="large"
               prefix-icon="User"
