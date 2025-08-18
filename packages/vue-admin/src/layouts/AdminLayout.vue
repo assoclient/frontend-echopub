@@ -3,7 +3,7 @@
     <!-- Sidebar -->
     <aside class="sidebar" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
       <div class="sidebar-header">
-        <img src="/assets/logo.png" width="150" alt="Logo" class="logo" />
+        <img src="/assets/EchoPub-removebg-preview.png"  alt="Logo" class="logo" />
        <!--  <h3 v-if="!sidebarCollapsed">Admin Panel</h3> -->
       </div>
       

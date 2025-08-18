@@ -681,4 +681,52 @@ onMounted(async () => {
     transform: rotate(360deg);
   }
 }
+
+@media (max-width: 768px) {
+  .create-campaign-page {
+    padding: 8px;
+    .card {
+      padding: 8px;
+    }
+    .campaign-form {
+      max-width: 100%;
+      .el-row {
+        flex-direction: column !important;
+        .el-col {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+      }
+      .el-form-item {
+        label {
+          font-size: 14px;
+        }
+      }
+      .el-button {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+    }
+    .media-preview-section {
+      .media-preview-container {
+        .image-preview,
+        .video-preview {
+          max-width: 100%;
+          max-height: 180px;
+          .preview-image,
+          .preview-video {
+            height: 140px;
+            max-height: 140px;
+          }
+        }
+      }
+      h4 {
+        font-size: 13px;
+      }
+    }
+    .form-tip {
+      font-size: 11px;
+    }
+  }
+}
 </style>

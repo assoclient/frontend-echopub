@@ -21,7 +21,7 @@
         <div class="hero-slide" :class="{ active: currentSlide === 0 }">
           <div class="hero-container1">
             <div class="hero-content">
-              <h1>Boostez vos campagnes publicitaires</h1>
+              <h1>Boostez vos campagnes publicitaires sur statuts WhatsApp</h1>
               <p>Connectez-vous avec des ambassadeurs qualifiés et multipliez l'impact de vos campagnes marketing grâce à notre plateforme innovante.</p>
               <div class="hero-buttons">
                 <el-button type="primary" size="large" @click="goToRegister">
@@ -1128,39 +1128,96 @@ export default {
     .hero-container {
       grid-template-columns: 1fr;
       text-align: center;
+      background-image: url('../../public/assets/banner/banner-mobile1.png');
 
       .hero-content h1 {
-        font-size: 2.5rem;
+        font-size: 2rem;
       }
     }
-  }
-
-  .features .features-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .faq {
-    .faq-container {
-      .faq-item {
-        .faq-question {
-          padding: 1rem 1.5rem;
-          
-          h3 {
-            font-size: 1.1rem;
-          }
-        }
-        
-        .faq-answer {
-          padding: 0 1.5rem 1rem;
-        }
-      }
-    }
-  }
-
-  .testimonials {
-    .testimonials-grid {
+    .hero-container1 {
       grid-template-columns: 1fr;
-      
+      text-align: center;
+      background-image: url('../../public/assets/banner/banner-mobile.png');
+
+      .hero-content h1 {
+        font-size: 2rem;
+      }
+    }
+  }
+
+  .navbar {
+    .nav-container {
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      gap: 0.5rem;
+      .nav-logo {
+        margin-bottom: 0.5rem;
+        text-align: center;
+      }
+      .nav-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+        .login-button,
+        .register-button {
+          width: 100%;
+          min-width: 120px;
+        }
+      }
+    }
+  }
+
+            .hero-container1 {
+              grid-template-columns: 1fr;
+              text-align: center;
+              padding: 0 0.5rem;
+              gap: 1rem;
+              min-height: 60vh;
+              .hero-content {
+                h1 {
+                  font-size: 2rem;
+                }
+                p {
+                  font-size: 1rem;
+                }
+                .hero-buttons {
+                  flex-direction: column;
+                  gap: 0.5rem;
+                  align-items: center;
+                  padding-bottom: 40px;
+                  button,
+                  .el-button {
+                    width: 100%;
+                    min-width: 120px;
+                  }
+                }
+              }
+            }
+            .hero-container {
+              padding: 0 0.5rem;
+              gap: 1rem;
+              min-height: 60vh;
+              .hero-content {
+                h1 {
+                  font-size: 2rem;
+                }
+                p {
+                  font-size: 1rem;
+                }
+                .hero-buttons {
+                  flex-direction: column;
+                  gap: 0.5rem;
+                  align-items: center;
+                  padding-bottom: 40px;
+                  button,
+                  .el-button {
+                    width: 100%;
+                    min-width: 120px;
+                  }
+                }
+              }
+            }
       .testimonial-card {
         padding: 1.5rem;
         
@@ -1175,7 +1232,7 @@ export default {
         }
       }
     }
-  }
+  
 
   .download .download-buttons {
     flex-direction: column;
@@ -1191,7 +1248,7 @@ export default {
   .navbar .nav-container {
     padding: 1rem;
   }
-}
+
 
 // Animations for slider
 @keyframes slideInLeft {

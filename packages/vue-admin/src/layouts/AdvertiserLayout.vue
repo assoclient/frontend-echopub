@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { 
@@ -79,6 +79,22 @@ import {
 const router = useRouter()
 const authStore = useAuthStore()
 const sidebarCollapsed = ref(false)
+
+// Collapse sidebar on small screens
+const handleResize = () => {
+  if (window.innerWidth <= 768) {
+    sidebarCollapsed.value = true
+  } else {
+    sidebarCollapsed.value = false
+  }
+}
+
+onMounted(() => {
+  handleResize()
+  window.addEventListener('resize', handleResize)
+})
+
+
 
 const user = computed(() => authStore.user)
 
@@ -124,7 +140,7 @@ const handleUserMenu = (command) => {
   transition: width 0.3s ease;
   
   &.sidebar-collapsed {
-    width: 80px;
+    width: 66px;
     
     .sidebar-header h3 {
       display: none;
@@ -249,5 +265,15 @@ const handleUserMenu = (command) => {
 .sidebar-toggle {
   color: var(--primary-blue);
   font-size: 20px;
+}
+
+@media (max-width: 768px) {
+  .header {
+    .header-left {
+      h2 {
+        font-size: 16px;
+      }
+    }
+  }
 }
 </style> 
