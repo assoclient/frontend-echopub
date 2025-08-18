@@ -120,6 +120,7 @@
 
 <script>
 import { User, Message, Phone, Lock, Check } from '@element-plus/icons-vue'
+import { useAuthStore } from '@/stores/auth'
 
 export default {
   name: 'Register',
@@ -159,11 +160,21 @@ export default {
           { type: 'email', message: 'Veuillez entrer un email valide', trigger: 'blur' }
         ],
         phone: [
-          { required: true, message: 'Le numéro de téléphone est requis', trigger: 'blur' }
+          { required: true, message: 'Le numéro de téléphone est requis', trigger: 'blur' },
+          { 
+            pattern: /^(\+237|237)?[6-9][0-9]{8}$/, 
+            message: 'Veuillez entrer un numéro de téléphone camerounais valide', 
+            trigger: 'blur' 
+          }
         ],
         password: [
           { required: true, message: 'Le mot de passe est requis', trigger: 'blur' },
-          { min: 6, message: 'Le mot de passe doit contenir au moins 6 caractères', trigger: 'blur' }
+          { min: 6, message: 'Le mot de passe doit contenir au moins 6 caractères', trigger: 'blur' },
+          { 
+            pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 
+            message: 'Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre', 
+            trigger: 'blur' 
+          }
         ],
         confirmPassword: [
           { required: true, message: 'Veuillez confirmer le mot de passe', trigger: 'blur' },
@@ -184,14 +195,22 @@ export default {
         }
 
         this.loading = true
+         const authService = useAuthStore()
+         const response = await authService.register({...this.form, role: 'advertiser'})
+         if (response.success) {
+          this.$message.success('Compte annonceur créé avec succès !')
+          this.$router.push('/login/advertiser')
+         } else {
+          this.$message.error(response.message)
+         }
+         this.loading = false
+         return
 
-        // Simuler l'inscription
-        await new Promise(resolve => setTimeout(resolve, 2000))
-
-        this.$message.success('Compte annonceur créé avec succès !')
-        this.$router.push('/login/advertiser')
+        
+        
       } catch (error) {
-        this.$message.error('Erreur lors de la création du compte')
+        console.error('Erreur d\'inscription:', error)
+        this.$message.error('Erreur de connexion. Vérifiez votre réseau.')
       } finally {
         this.loading = false
       }
