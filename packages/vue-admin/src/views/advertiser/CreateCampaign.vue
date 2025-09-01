@@ -24,7 +24,7 @@
             <el-form-item label="Budget" prop="budget">
               <el-input-number 
                 v-model="form.budget" 
-                :min="10000"
+                :min="advertiserMinCampaignAmount"
                 :step="1000"
                 style="width: 100%"
                 placeholder="Budget en FCFA"
@@ -42,9 +42,9 @@
                 style="width: 100%"
                 placeholder="Calculé automatiquement"
               />
-              <div class="form-tip">
+              <!-- <div class="form-tip">
                 Basé sur un CPV de {{ advertiserCPV }} FCFA (Budget ÷ CPV = {{ form.budget }} ÷ {{ advertiserCPV }} = {{ Math.floor(form.budget / advertiserCPV) }} vues)
-              </div>
+              </div> -->
             </el-form-item>
           </el-col>
         </el-row>
@@ -241,6 +241,7 @@ const campaignForm = ref(null)
 const loading = ref(false)
 const fileList = ref([])
 const advertiserCPV = ref(14) // CPV par défaut
+const advertiserMinCampaignAmount = ref(10000)
 const mediaPreview = ref('') // URL de prévisualisation du média
 const validatingVideo = ref(false) // Indicateur de validation vidéo
 
@@ -263,11 +264,13 @@ const loadPlatformSettings = async () => {
     const response = await settingsService.getSettings()
     const settings = response.data
     advertiserCPV.value = settings.payment?.cpv || 14
+    advertiserMinCampaignAmount.value = settings.payment?.minCampaignAmount || 10000
     console.log('📊 CPV annonceur chargé:', advertiserCPV.value)
   } catch (error) {
     console.error('Erreur lors du chargement des paramètres:', error)
     // Utiliser la valeur par défaut en cas d'erreur
     advertiserCPV.value = 14
+    advertiserMinCampaignAmount.value = 10000
   }
 }
 
@@ -298,7 +301,7 @@ const rules = {
   ],
   budget: [
     { required: true, message: 'Le budget est requis', trigger: 'blur' },
-    { type: 'number', min: 10000, message: 'Le budget minimum est de 10 000 FCFA', trigger: 'blur' }
+    { type: 'number', min: advertiserMinCampaignAmount, message: 'Le budget minimum est de 10 000 FCFA', trigger: 'blur' }
   ],
   targetLocations: [
     { required: true, message: 'Sélectionnez au moins une localisation', trigger: 'change' },

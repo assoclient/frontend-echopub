@@ -711,11 +711,11 @@
            <el-form-item label="Téléphone" prop="phone">
              <el-input 
                v-model="validationForm.phone" 
-               placeholder="Ex: +237677777777"
-               maxlength="13"
+               placeholder="Ex: 677777777"
+               maxlength="9"
              />
              <div class="form-tip">
-               Format requis: +237XXXXXXXXX (9 chiffres après +237)
+               Format requis: 6XXXXXXXXX (9 chiffres après +237)
              </div>
            </el-form-item>
          </el-form>
@@ -812,8 +812,8 @@ const validationRules = reactive({
   phone: [
     { required: true, message: 'Veuillez saisir votre numéro de téléphone', trigger: 'blur' },
     { 
-      pattern: /^\+237[0-9]{9}$/, 
-      message: 'Format: +237XXXXXXXXX', 
+      pattern: /^6[0-9]{8}$/, 
+      message: 'Format: 6XXXXXXXX', 
       trigger: 'blur' 
     }
   ]
