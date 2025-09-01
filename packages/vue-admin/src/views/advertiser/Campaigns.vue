@@ -259,7 +259,7 @@
             <el-form-item label="Budget" prop="budget">
               <el-input-number 
                 v-model="editForm.budget" 
-                :min="10000"
+                :min="advertiserMinCampaignAmount"
                 :step="1000"
                 style="width: 100%"
                 placeholder="Budget en FCFA"
@@ -277,9 +277,9 @@
                 style="width: 100%"
                 placeholder="Calculé automatiquement"
               />
-              <div class="form-tip">
+             <!--  <div class="form-tip">
                 Basé sur un CPV de {{ advertiserCPV }} FCFA (Budget ÷ CPV = {{ editForm.budget }} ÷ {{ advertiserCPV }} = {{ Math.floor(editForm.budget / advertiserCPV) }} vues)
-              </div>
+              </div> -->
             </el-form-item>
           </el-col>
         </el-row>
@@ -770,6 +770,7 @@ const editLoading = ref(false)
 const editFormRef = ref(null)
 const editFileList = ref([])
 const advertiserCPV = ref(14) // CPV par défaut
+const advertiserMinCampaignAmount = ref(10000)
 
 // Modal d'aperçu du média
 const mediaPreviewVisible = ref(false)
@@ -849,7 +850,7 @@ const editRules = {
   ],
   budget: [
     { required: true, message: 'Le budget est requis', trigger: 'blur' },
-    { type: 'number', min: 10000, message: 'Le budget minimum est de 10 000 FCFA', trigger: 'blur' }
+    { type: 'number', min: 100, message: 'Le budget minimum est de 100 FCFA', trigger: 'blur' }
   ],
   targetLink: [
     { required: true, message: 'Le lien cible est requis', trigger: 'blur' },
@@ -896,11 +897,13 @@ const loadPlatformSettings = async () => {
     const response = await settingsService.getSettings()
     const settings = response.data
     advertiserCPV.value = settings.payment?.cpv || 14
+    advertiserMinCampaignAmount.value = settings.payment?.minCampaignAmount || 10000
     console.log('📊 CPV annonceur chargé:', advertiserCPV.value)
   } catch (error) {
     console.error('Erreur lors du chargement des paramètres:', error)
     // Utiliser la valeur par défaut en cas d'erreur
     advertiserCPV.value = 14
+    advertiserMinCampaignAmount.value = 10000
   }
 }
 
