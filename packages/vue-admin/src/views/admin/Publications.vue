@@ -477,7 +477,7 @@ const canValidate = computed(() => {
 const calculatedEarnings = computed(() => {
   if (!validationForm.views_count || !selectedPublication.value?.campaign) return 0
   // Estimation basée sur le CPV ambassadeur (valeur par défaut: 10 FCFA)
-  const estimatedCpv = 10 // Cette valeur sera récupérée du backend
+  const estimatedCpv = selectedPublication.value?.campaign?.cpv_ambassador // Cette valeur sera récupérée du backend
   return validationForm.views_count * estimatedCpv
 })
 
