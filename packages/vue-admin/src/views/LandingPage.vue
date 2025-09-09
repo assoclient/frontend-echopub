@@ -7,6 +7,9 @@
           <img src="/assets/logobg1.png" width="150" alt="Logo" class="logo" />
         </div>
         <div class="nav-buttons">
+          <el-button type="primary" class="login-button" @click="downloadAndroid">
+            <img src="/assets/icons/android.png" width="20" height="20" alt="Google Play" class="download-icon-img"/>
+            Télécharger l'application</el-button> 
           <el-button type="primary" class="login-button" @click="goToLogin">Se connecter</el-button>
           <el-button class="register-button" size="large" @click="goToRegister">Créer un compte</el-button>
 <!--           <el-button type="text" @click="goToAdminLogin" class="admin-link">Admin</el-button>
@@ -403,7 +406,7 @@ export default {
     },
     downloadAndroid() {
       // Simuler le téléchargement Android
-      window.open('#', '_blank')
+      window.open('https://play.google.com/store/apps/details?id=com.echopub.communication', '_blank')
     },
     goToAdminLogin() {
       this.$router.push('/login/admin')
