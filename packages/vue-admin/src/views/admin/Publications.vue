@@ -100,6 +100,11 @@
             {{ formatDate(scope.row.createdAt) }}
           </template>
         </el-table-column>
+        <el-table-column prop="createdAt" label="Nombre d'Heures depuis la publication" width="200">
+          <template #default="scope">
+            {{ formatHoursSincePublication(scope.row.createdAt) }}
+          </template>
+        </el-table-column>
 
         <el-table-column label="Actions" width="120" fixed="right">
           <template #default="scope">
@@ -109,6 +114,14 @@
               :icon="View"
               @click="openDetailsModal(scope.row)"
               title="Voir les détails"
+            />
+            <el-button
+              v-if="scope.row.status === 'submitted' || scope.row.status === 'published'"
+              type="danger"
+              size="small"
+              :icon="Delete"
+              @click="openDeleteModal(scope.row)"
+              title="Supprimer la publication"
             />
           </template>
         </el-table-column>
@@ -265,7 +278,18 @@
         </div>
       </div>
     </el-dialog>
-
+    <el-dialog
+    v-model="deleteModalVisible"
+    title="Suppression de la publication"
+    width="300px"
+     :close-on-click-modal="false"
+     >
+      <div class="delete-modal-content">
+        <h5>Voulez vous vraiment supprimer cette publication ?</h5>
+        <el-button @click="deleteModalVisible = false">Annuler</el-button>
+        <el-button  type="danger" @click="confirmDelete">Supprimer</el-button>
+      </div>
+    </el-dialog>
     <!-- Modal de validation -->
     <el-dialog
       v-model="validationModalVisible"
@@ -359,7 +383,8 @@ import {
   View, 
   Download, 
   Check, 
-  Picture 
+  Picture,
+  Delete
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ambassadorCampaignService } from '@/services/api'
@@ -380,7 +405,8 @@ const detailsModalVisible = ref(false)
 const selectedPublication = ref(null)
 const imagePreviewVisible = ref(false)
 const previewImageUrl = ref('')
-
+const deleteModalVisible = ref(false)
+const selectedPublicationToDelete = ref(null)
 // Modal de validation
 const validationModalVisible = ref(false)
 const validationFormRef = ref(null)
@@ -434,7 +460,13 @@ const formatDate = (date) => {
     minute: '2-digit'
   })
 }
-
+const formatHoursSincePublication = (date) => {
+  const now = new Date()
+  const publicationDate = new Date(date)
+  const diff = now - publicationDate
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  return hours + 'h'
+}
 const canValidate = computed(() => {
   if (!selectedPublication.value) return false
   if (selectedPublication.value.status === 'validated') return false
@@ -506,6 +538,11 @@ const openDetailsModal = (publication) => {
   detailsModalVisible.value = true
 }
 
+const openDeleteModal = (publication) => {
+  selectedPublicationToDelete.value = publication
+  deleteModalVisible.value = true
+}
+
 const openImagePreview = (imageUrl) => {
   previewImageUrl.value = imageUrl
   imagePreviewVisible.value = true
@@ -532,6 +569,22 @@ const openValidationModal = () => {
   
   validationModalVisible.value = true
 }
+const confirmDelete = async () => {
+  try {
+    await ambassadorCampaignService.deleteAmbassadorCampaign(selectedPublicationToDelete.value._id)
+    deleteModalVisible.value = false
+    ElMessage.success('Publication supprimée avec succès')
+    loadPublications()
+  } catch (error) {
+    console.error('Erreur lors de la suppression:', error)
+    ElMessage.error('Erreur lors de la suppression de la publication')
+    if (error?.message) {
+      ElMessage.error(error.message)
+    } else {
+      ElMessage.error('Erreur lors de la suppression de la publication')
+    }
+  }
+  }
 
 const confirmValidation = async () => {
   try {
