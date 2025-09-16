@@ -47,6 +47,19 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <div class="table-footer">
+        <el-pagination
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="totalUsers"
+          :page-size="pageSize"
+          :current-page="currentPage"
+          :page-sizes="[10, 20, 50, 100]"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -59,13 +72,19 @@ import { userService } from '@/services/api'
 
 const users = ref([])
 const loading = ref(false)
+const currentPage = ref(1)
+const pageSize = ref(10)
+const totalUsers = ref(0)
 
 // Charger les utilisateurs depuis l'API
 const loadUsers = async () => {
   loading.value = true
   try {
-    const response = await userService.getAllUsers()
-    users.value = response.data
+    const response = await userService.getAllUsers({ page: currentPage.value, pageSize: pageSize.value })
+    // Expecting shape: { totalCount, page, pageSize, data }
+    console.log('🔍 loadUsers - Réponse reçue:', response.data)
+    totalUsers.value = response.totalCount || 0
+    users.value = response.data || []
   } catch (error) {
     console.error('Erreur lors du chargement des utilisateurs:', error)
     ElMessage.error('Erreur lors du chargement des utilisateurs')
@@ -88,6 +107,17 @@ const toggleUserStatus = async (user) => {
     console.error('Erreur lors du changement de statut:', error)
     ElMessage.error('Erreur lors du changement de statut')
   }
+}
+
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  currentPage.value = 1
+  loadUsers()
+}
+
+const handleCurrentChange = (page) => {
+  currentPage.value = page
+  loadUsers()
 }
 
 const getRoleType = (role) => {
@@ -127,6 +157,11 @@ const formatMoney = (amount) => {
       font-weight: 600;
       color: var(--dark-grey);
     }
+  }
+  .table-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
   }
 }
 </style> 
