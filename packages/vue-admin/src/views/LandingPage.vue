@@ -11,7 +11,7 @@
             <img src="/assets/icons/android.png" width="20" height="20" alt="Google Play" class="download-icon-img"/>
             Télécharger l'application</el-button> 
           <el-button type="primary" class="login-button" @click="goToLogin">Se connecter</el-button>
-          <el-button class="register-button" size="large" @click="goToRegister">Créer un compte</el-button>
+          <el-button class="register-button" size="large" @click="goToRegister">Créer une campagne</el-button>
 <!--           <el-button type="text" @click="goToAdminLogin" class="admin-link">Admin</el-button>
  -->        </div>
       </div>
@@ -50,9 +50,9 @@
               <h1>Gagnez en partageant du contenu</h1>
               <p>Rejoignez notre communauté d'ambassadeurs et monétisez votre influence en promouvant des marques qui vous correspondent.</p>
               <div class="hero-buttons">
-                <el-button type="primary" size="large" @click="goToDownloadSection">
+                <!-- <el-button type="primary" size="large" @click="goToDownloadSection">
                   Devenir ambassadeur
-                </el-button>
+                </el-button> -->
                 <el-button size="large" @click="scrollToFeatures">
                   Voir les opportunités
                 </el-button>
@@ -274,6 +274,10 @@
       </div>
     </footer>
   </div>
+  <!-- WhatsApp Floating Button -->
+  <div class="whatsapp-float" @click="openWhatsApp" title="Discuter sur WhatsApp">
+    <img src="/assets/whatsapp-icon-free-png.webp" alt="WhatsApp" />
+  </div>
 </template>
 
 <script>
@@ -413,6 +417,12 @@ export default {
     },
     toggleFaq(index) {
       this.faqItems[index].isOpen = !this.faqItems[index].isOpen;
+    },
+    openWhatsApp() {
+      const phone = '237694071931';
+      const text = encodeURIComponent("Bonjour EchoPub, j'aimerais en savoir plus.");
+      const url = `https://wa.me/${phone}?text=${text}`;
+      window.open(url, '_blank');
     }
   }
 }
@@ -956,9 +966,9 @@ export default {
   background: var(--light-grey);
 
   .container {
-    max-width: 1200px;
+    max-width: 1300px;
     margin: 0 auto;
-    padding: 0 2rem;
+    padding: 0 1rem;
     text-align: center;
 
     h2 {
@@ -1330,6 +1340,35 @@ export default {
         }
       }
     }
+  }
+}
+
+// Floating WhatsApp button
+.whatsapp-float {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #25D366;
+  color: white;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.24);
+    background-color: #1ebe57;
+  }
+  img {
+    width: 28px;
+    height: 28px;
   }
 }
 </style> 
