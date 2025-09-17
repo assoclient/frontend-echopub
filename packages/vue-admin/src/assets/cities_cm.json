@@ -78,5 +78,40 @@
   {"name": "Penka-Michel", "lat": 5.4500, "lng": 10.3500, "region": "Ouest"},
   {"name": "Santchou", "lat": 5.1500, "lng": 9.9833, "region": "Ouest"},
   {"name": "Tonga", "lat": 5.1000, "lng": 10.7000, "region": "Ouest"},
-  {"name": "Tschang", "lat": 5.4500, "lng": 10.0500, "region": "Ouest"}
+  {"name": "Bandjoun", "lat": 5.4500, "lng": 10.0500, "region": "Ouest"},
+  {"name": "Akom II", "lat": 2.7833, "lng": 10.5667, "region": "Sud"},
+  {"name": "Ambam", "lat": 2.3833, "lng": 11.2833, "region": "Sud"},
+  {"name": "Campo", "lat": 2.3667, "lng": 9.8333, "region": "Sud"},
+  {"name": "Oveng", "lat": 2.2667, "lng": 11.0167, "region": "Sud"},
+
+  {"name": "Kontcha", "lat": 7.4667, "lng": 12.2333, "region": "Adamaoua"},
+  {"name": "Ngaoundal", "lat": 6.5000, "lng": 13.2667, "region": "Adamaoua"},
+  {"name": "Tignère", "lat": 7.3667, "lng": 12.6500, "region": "Adamaoua"},
+
+  {"name": "Poli", "lat": 8.4833, "lng": 13.2500, "region": "Nord"},
+  {"name": "Touboro", "lat": 7.7833, "lng": 15.3167, "region": "Nord"},
+  {"name": "Lagdo", "lat": 9.0000, "lng": 13.6333, "region": "Nord"},
+  {"name": "Figuil", "lat": 9.7167, "lng": 13.9500, "region": "Nord"},
+
+  {"name": "Tokombéré", "lat": 10.8667, "lng": 13.5667, "region": "Extrême-Nord"},
+  {"name": "Mindif", "lat": 10.3833, "lng": 14.4500, "region": "Extrême-Nord"},
+
+  {"name": "Batibo", "lat": 5.8500, "lng": 9.8667, "region": "Nord-Ouest"},
+  {"name": "Jakiri", "lat": 6.1000, "lng": 10.6667, "region": "Nord-Ouest"},
+  {"name": "Fundong", "lat": 6.2500, "lng": 10.2667, "region": "Nord-Ouest"},
+  {"name": "Belo", "lat": 6.1333, "lng": 10.2500, "region": "Nord-Ouest"},
+  {"name": "Njinikom", "lat": 6.2500, "lng": 10.2833, "region": "Nord-Ouest"},
+  {"name": "Ndu", "lat": 6.4667, "lng": 10.7500, "region": "Nord-Ouest"},
+  {"name": "Kumbo", "lat": 6.2000, "lng": 10.6667, "region": "Nord-Ouest"},
+
+  {"name": "Muyuka", "lat": 4.2897, "lng": 9.4108, "region": "Sud-Ouest"},
+  {"name": "Ekondo-Titi", "lat": 4.5167, "lng": 9.0833, "region": "Sud-Ouest"},
+  {"name": "Nguti", "lat": 5.3167, "lng": 9.4333, "region": "Sud-Ouest"},
+  {"name": "Tombel", "lat": 4.7000, "lng": 9.7000, "region": "Sud-Ouest"},
+
+  {"name": "Ngambe-Tikar", "lat": 5.0833, "lng": 11.7833, "region": "Centre"},
+  {"name": "Sa’a", "lat": 4.3667, "lng": 11.3667, "region": "Centre"}
+
+
+
 ] 
