@@ -147,6 +147,17 @@
                 scope.row.status === 'submitted' ? 'Activer' : 'Modifier'
               }}
             </el-button>
+            <el-button 
+              size="small" 
+              type="danger" 
+              @click="deleteCampaign(scope.row)"
+              :icon="Delete"
+              v-if="scope.row.status === 'draft'"
+            >
+              <el-tooltip content="Supprimer la campagne" placement="top">
+                
+              </el-tooltip>
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -335,7 +346,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Search, Refresh, View, Document } from '@element-plus/icons-vue'
+import { Search, Refresh, View, Document, Delete } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { campaignService } from '@/services/api'
 
@@ -442,6 +453,20 @@ const getTransactionStatusType = (status) => {
     cancelled: 'info'
   }
   return types[status] || 'info'
+}
+
+const deleteCampaign = (campaign) => {
+  ElMessageBox.confirm('Êtes-vous sûr de vouloir supprimer la campagne "'+campaign.title+'" ?', 'Confirmation de suppression', {
+    confirmButtonText: 'Supprimer',
+    cancelButtonText: 'Annuler',
+    type: 'warning',
+  }).then(async () => {
+    await campaignService.deleteCampaign(campaign._id)
+    ElMessage.success('Campagne supprimée avec succès')
+  }).catch(() => {
+    ElMessage.error('Annulation de la suppression')
+  })
+  loadCampaigns()
 }
 
 const canActivateCampaign = (campaign) => {
