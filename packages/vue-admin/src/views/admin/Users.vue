@@ -21,18 +21,27 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="whatsapp_number" label="Whatsapp">
+         
+        </el-table-column>
+        <el-table-column prop="location" label="Ville">
+          <template #default="scope">
+            {{ scope.row?.location?.city+','+scope.row?.location?.region }}
+          </template>
+        </el-table-column>
+        
         <el-table-column prop="balance" label="Solde">
           <template #default="scope">
             {{ formatMoney(scope.row.balance) }}
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="Statut">
+       <!--  <el-table-column prop="status" label="Statut">
           <template #default="scope">
             <el-tag :type="scope.row.isValid ? 'success' : 'danger'">
               {{ scope.row.isValid ? 'Actif' : 'Inactif' }}
             </el-tag>
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column label="Actions" width="120">
           <template #default="scope">
             <el-button 
